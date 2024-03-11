@@ -1,9 +1,9 @@
-# \[Group name\]
+# \[Anna, Signe og Klara\]
 
 **Group members:**
-- A
-- B
-- C
+- Anna
+- Signe
+- Klara
 
 This repository contains  
 1. Inaugural project. 
