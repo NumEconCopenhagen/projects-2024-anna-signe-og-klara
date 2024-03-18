@@ -5,12 +5,14 @@ import matplotlib.pyplot as plt
 from types import SimpleNamespace
 import numpy as np
 
+#Defining the class ExchangeEconomyClass
 class ExchangeEconomyClass:
-
     def __init__(self):
 
         par = self.par = SimpleNamespace()
 
+#Defining parameters and endowments
+    
         # a. preferences
         par.alpha = 1/3
         par.beta = 2/3
@@ -45,25 +47,28 @@ class ExchangeEconomyClass:
         x2B = (1 - par.beta) * ((p1 * par.w1B + 1 * par.w2B) / (par.p2))
         return x1B, x2B
 
+#Defining functions for market clearing
     def check_market_clearing(self,p1):
 
         par = self.par
 
+# Calculating the demands for both individuals for given prices of p1
         x1A,x2A = self.demand_A(p1)
         x1B,x2B = self.demand_B(p1)
 
+# Checking if the market is clearing by comparing the sum of demands and the endowments
         eps1 = x1A-par.w1A + x1B-(1-par.w1A)
         eps2 = x2A-par.w2A + x2B-(1-par.w2A)
 
         return eps1,eps2
-
     def plot_edgeworth_box(self, N):
         combinations_A = []
         combinations_B = []
 
-        # Generate N evenly spaced values between 0 and 1
+# Generate N evenly spaced values between 0 and 1 with 75 intervals
         x_values = np.linspace(0, 1, 75)
 
+# Loop over all combinations of x1A and x2A in order to find the utility-maximizing allocation for individual A
         for x1A in x_values:
             for x2A in x_values:
                 # Check conditions for allocation (x1A, x2A) for individual A
@@ -76,9 +81,11 @@ class ExchangeEconomyClass:
                         combinations_A.append([x1A, x2A])
                         combinations_B.append([x1B, x2B])
 
+# Convert lists to arrays
         combinations_A = np.array(combinations_A)
         combinations_B = np.array(combinations_B)
 
+# Plot the Edgeworth box
         plt.plot(combinations_A[:, 0], combinations_A[:, 1], 'o', label='Individual A', linewidth = 0)
         plt.plot(self.par.w1A, self.par.w2A, 'ro', label='Endowment A')
     
@@ -109,8 +116,6 @@ class ExchangeEconomyClass:
 
             print(f'For p1 = {price:.2f} epsilon1 = {sign1}{abs(error1):.4f} and epsilon2 = {sign2}{abs(error2):.4f}')
 
-    
-    
     def calc_eps(self, N):
         p1 = 0.5
         i = 1
