@@ -122,7 +122,7 @@ class ExchangeEconomyClass:
         result = {'p1': [], 'eps1': [], 'eps2': []}  # Initialize an empty dictionary
         while p1 <= 2.5:
             eps1, eps2 = self.check_market_clearing(p1)
-            print(f"For p1 = {p1}, eps1 = {eps1}, eps2 = {eps2}")
+            print(f"For p1 = {p1:.2f}: epsilon1 = {eps1:.4f} and epsilon2 = {eps2:.4f}")
             result['p1'].append(p1)  # Append the value of p1 to the list associated with the 'p1' key
             result['eps1'].append(eps1)  # Append the value of eps1 to the list associated with the 'eps1' key
             result['eps2'].append(eps2)  # Append the value of eps2 to the list associated with the 'eps2' key
