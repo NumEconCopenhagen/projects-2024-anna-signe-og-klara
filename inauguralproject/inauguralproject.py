@@ -1,25 +1,9 @@
-def square(x):
-    """ square numpy array
-    
-    Args:
-    
-        x (ndarray): input array
-        
-    Returns:
-    
-        y (ndarray): output array
-    
-    """
-    
-    y = x**2
-    return y
-
-
 #Exchange economy from Project
 
 import numpy as np
 import matplotlib.pyplot as plt
 from types import SimpleNamespace
+import numpy as np
 
 class ExchangeEconomyClass:
 
@@ -39,24 +23,26 @@ class ExchangeEconomyClass:
         par.w1B = 1 - par.w1A
         par.w2B = 1 - par.w2A
 
+        par.p2 = 1
+
     def utility_A(self,x1A,x2A):
         par = self.par 
-        return x1A**par.alpha*x2A**(1-par.alpha)
+        return x1A**(par.alpha)*x2A**(1-par.alpha)
 
     def utility_B(self,x1B,x2B):
         par = self.par 
-        return x1B**par.beta*x2B**(1-par.beta)
+        return x1B**(par.beta)*x2B**(1-par.beta)
 
     def demand_A(self,p1):
         par = self.par
         x1A = par.alpha * ((p1 * par.w1A + 1 * par.w2A) / (p1))
-        x2A = (1 - par.alpha) * ((p1 * par.w1A + 1 * par.w2A) / (p1))
+        x2A = (1 - par.alpha) * ((p1 * par.w1A + 1 * par.w2A) / (par.p2))
         return x1A, x2A
 
     def demand_B(self,p1):
         par = self.par
         x1B = par.beta * ((p1 * par.w1B + 1 * par.w2B) / (p1))
-        x2B = (1 - par.beta) * ((p1 * par.w1B + 1 * par.w2B) / (p1))
+        x2B = (1 - par.beta) * ((p1 * par.w1B + 1 * par.w2B) / (par.p2))
         return x1B, x2B
 
     def check_market_clearing(self,p1):
@@ -70,7 +56,7 @@ class ExchangeEconomyClass:
         eps2 = x2A-par.w2A + x2B-(1-par.w2A)
 
         return eps1,eps2
-    
+
     def plot_edgeworth_box(self, N):
         combinations_A = []
         combinations_B = []
@@ -94,19 +80,68 @@ class ExchangeEconomyClass:
         combinations_B = np.array(combinations_B)
 
         plt.plot(combinations_A[:, 0], combinations_A[:, 1], 'o', label='Individual A', linewidth = 0)
-        #plt.plot(combinations_B[:, 0], combinations_B[:, 1], 'o', label='Individual B', linewidth = 0)
         plt.plot(self.par.w1A, self.par.w2A, 'ro', label='Endowment A')
-        #plt.plot(self.par.w1B, self.par.w2B, 'bo', label='Endowment B')
-
+    
         plt.xlabel('x_1^a')
         plt.ylabel('x_2^a')
         plt.title('Edgeworth Box')
         plt.legend()
         plt.show()
 
+    def test_eps(self, N):
+        P1 = np.linspace(0.5, 2.5, N+1)
 
+        eps1 = []
+        eps2 = []
+        p_1 = []
 
+        for p1 in P1:
+            demandA1, demandA2 = self.demand_A(p1)
+            demandB1, demandB2 = self.demand_B(p1)
 
+            eps1.append(demandA1 + demandB1 - self.par.w1A - self.par.w1B)
+            eps2.append(demandB1 + demandB2 - self.par.w2A - self.par.w2B)
+            p_1.append(p1)   
 
+        for price, error1, error2 in zip(p_1, eps1, eps2):
+            sign1 = '+' if error1 >= 0 else '-'
+            sign2 = '+' if error2 >= 0 else '-'
 
+            print(f'For p1 = {price:.2f} epsilon1 = {sign1}{abs(error1):.4f} and epsilon2 = {sign2}{abs(error2):.4f}')
+
+    
+    
+    def calc_eps(self, N):
+        p1 = 0.5
+        i = 1
+        result = {'p1': [], 'eps1': [], 'eps2': []}  # Initialize an empty dictionary
+        while p1 <= 2.5:
+            eps1, eps2 = self.check_market_clearing(p1)
+            print(f"For p1 = {p1}, eps1 = {eps1}, eps2 = {eps2}")
+            result['p1'].append(p1)  # Append the value of p1 to the list associated with the 'p1' key
+            result['eps1'].append(eps1)  # Append the value of eps1 to the list associated with the 'eps1' key
+            result['eps2'].append(eps2)  # Append the value of eps2 to the list associated with the 'eps2' key
+            i += 1
+            p1 = 0.5 + 2 * i / N
+        return result  # Return the dictionary
+
+    def plot_eps(self, N):    
+        # Get the values of p1, eps1, and eps2
+        p1_values = self.calc_eps(N=75)['p1']
+        eps1_values = self.calc_eps(N=75)['eps1']
+        eps2_values = self.calc_eps(N=75)['eps2']
+
+        # Plot eps1 and eps2 as a function of p1
+        plt.plot(p1_values, eps1_values, label='eps1')
+        plt.plot(p1_values, eps2_values, label='eps2')
+
+        # Add labels and legend
+        plt.xlabel('p1')
+        plt.ylabel('eps')
+        plt.legend()
+
+        # Show the plot
+        plt.show()
+
+    
 
