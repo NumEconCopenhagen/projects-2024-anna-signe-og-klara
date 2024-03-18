@@ -95,26 +95,26 @@ class ExchangeEconomyClass:
         plt.legend()
         plt.show()
 
-    def test_eps(self, N):
-        P1 = np.linspace(0.5, 2.5, N+1)
+   # def test_eps(self, N):
+   #     P1 = np.linspace(0.5, 2.5, N+1)
 
-        eps1 = []
-        eps2 = []
-        p_1 = []
+   #     eps1 = []
+   #     eps2 = []
+   #     p_1 = []
 
-        for p1 in P1:
-            demandA1, demandA2 = self.demand_A(p1)
-            demandB1, demandB2 = self.demand_B(p1)
+   #     for p1 in P1:
+   #         demandA1, demandA2 = self.demand_A(p1)
+   #         demandB1, demandB2 = self.demand_B(p1)
 
-            eps1.append(demandA1 + demandB1 - self.par.w1A - self.par.w1B)
-            eps2.append(demandB1 + demandB2 - self.par.w2A - self.par.w2B)
-            p_1.append(p1)   
+   #         eps1.append(demandA1 + demandB1 - self.par.w1A - self.par.w1B)
+   #         eps2.append(demandB1 + demandB2 - self.par.w2A - self.par.w2B)
+   #         p_1.append(p1)   
 
-        for price, error1, error2 in zip(p_1, eps1, eps2):
-            sign1 = '+' if error1 >= 0 else '-'
-            sign2 = '+' if error2 >= 0 else '-'
+   #     for price, error1, error2 in zip(p_1, eps1, eps2):
+   #         sign1 = '+' if error1 >= 0 else '-'
+   #         sign2 = '+' if error2 >= 0 else '-'
 
-            print(f'For p1 = {price:.2f} epsilon1 = {sign1}{abs(error1):.4f} and epsilon2 = {sign2}{abs(error2):.4f}')
+   #         print(f'For p1 = {price:.2f} epsilon1 = {sign1}{abs(error1):.4f} and epsilon2 = {sign2}{abs(error2):.4f}')
 
     def calc_eps(self, N):
         p1 = 0.5
