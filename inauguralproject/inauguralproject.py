@@ -24,7 +24,7 @@ class ExchangeEconomyClass:
         par.w1B = 1 - par.w1A
         par.w2B = 1 - par.w2A
 
-#Defining utility functions and demand functions
+# Defining utility functions and demand functions
     def utility_A(self,x1A,x2A):
         par = self.par 
         return x1A**par.alpha*x2A**(1-par.alpha)
@@ -50,17 +50,17 @@ class ExchangeEconomyClass:
 
         par = self.par
 
-#Calculating the demands for both individuals for given prices of p1
+# Calculating the demands for both individuals for given prices of p1
         x1A,x2A = self.demand_A(p1)
         x1B,x2B = self.demand_B(p1)
 
-#Checking if the market is clearing by comparing the sum of demands and the endowments
+# Checking if the market is clearing by comparing the sum of demands and the endowments
         eps1 = x1A-par.w1A + x1B-(1-par.w1A)
         eps2 = x2A-par.w2A + x2B-(1-par.w2A)
 
         return eps1,eps2
     
-#Defining two empty lists for the combination of consumption bundles    
+# Defining two empty lists for the combination of consumption bundles    
     def plot_edgeworth_box(self, N):
         combinations_A = []
         combinations_B = []
