@@ -185,7 +185,7 @@ class ExchangeEconomyClass:
         sol_case2 = optimize.minimize_scalar(
             self.find_prices_4b, 
             method='bounded',
-            bounds=(0, np.inf))
+            bounds=(0, 10))
 
         #unpack solution
         p1_case2 = sol_case2.x
