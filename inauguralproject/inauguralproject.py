@@ -4,6 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from types import SimpleNamespace
 import numpy as np
+from scipy import optimize
 
 #Defining the class ExchangeEconomyClass
 class ExchangeEconomyClass:
@@ -148,5 +149,25 @@ class ExchangeEconomyClass:
         # Show the plot
         plt.show()
 
+    #objective function 
+    def find_prices_4a(self,p1):
+        par = self.par
+        x1A, x2A = self.demand_A(p1)
+        x1B, x2B = self.demand_B(p1)
+        return -self.utility_A(1-x1B,1-x2B)
     
+    #call solver
+    def solve_4a(self):
+        sol_case1 = optimize.minimize_scalar(
+            self.find_prices_4a, 
+            method='bounded',
+            bounds=(0.5, 2.5))
 
+        #unpack solution
+        p1_case1 = sol_case1.x
+        x1A_case1,x2A_case1 = self.demand_A(p1_case1)
+        x1B_case1,x2B_case1 = self.demand_B(p1_case1)
+        u = self.utility_A(x1A_case1,x2A_case1)
+        print(f"x1A: {x1A_case1}, x2A: {x2A_case1}, x1B: {x1B_case1}, x2B: {x2B_case1}, p1: {p1_case1}, utility: {u}")
+
+        return sol_case1
