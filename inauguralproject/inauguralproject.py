@@ -28,28 +28,28 @@ class ExchangeEconomyClass:
 
         par.p2 = 1
 
-    def utility_A(self,x1A,x2A):
+    def utility_A(self, x1A, x2A):
         par = self.par 
-        return x1A**(par.alpha)*x2A**(1-par.alpha)
+        return x1A**(par.alpha) * x2A**(1 - par.alpha)
 
-    def utility_B(self,x1B,x2B):
+    def utility_B(self, x1B, x2B):
         par = self.par 
-        return x1B**(par.beta)*x2B**(1-par.beta)
+        return x1B**(par.beta) * x2B**(1 - par.beta)
 
-    def demand_A(self,p1):
+    def demand_A(self, p1):
         par = self.par
         x1A = par.alpha * ((p1 * par.w1A + 1 * par.w2A) / (p1))
         x2A = (1 - par.alpha) * ((p1 * par.w1A + 1 * par.w2A) / (par.p2))
         return x1A, x2A
 
-    def demand_B(self,p1):
+    def demand_B(self, p1):
         par = self.par
         x1B = par.beta * ((p1 * par.w1B + 1 * par.w2B) / (p1))
         x2B = (1 - par.beta) * ((p1 * par.w1B + 1 * par.w2B) / (par.p2))
         return x1B, x2B
 
 #Defining functions for market clearing
-    def check_market_clearing(self,p1):
+    def check_market_clearing(self, p1):
 
         par = self.par
 
@@ -58,10 +58,10 @@ class ExchangeEconomyClass:
         x1B,x2B = self.demand_B(p1)
 
 # Checking if the market is clearing by comparing the sum of demands and the endowments
-        eps1 = x1A-par.w1A + x1B-(1-par.w1A)
-        eps2 = x2A-par.w2A + x2B-(1-par.w2A)
+        eps1 = x1A - par.w1A + x1B - (1 - par.w1A)
+        eps2 = x2A - par.w2A + x2B - (1 - par.w2A)
 
-        return eps1,eps2
+        return eps1, eps2
     def plot_edgeworth_box(self, N):
         combinations_A = []
         combinations_B = []
@@ -96,27 +96,6 @@ class ExchangeEconomyClass:
         plt.legend()
         plt.show()
 
-   # def test_eps(self, N):
-   #     P1 = np.linspace(0.5, 2.5, N+1)
-
-   #     eps1 = []
-   #     eps2 = []
-   #     p_1 = []
-
-   #     for p1 in P1:
-   #         demandA1, demandA2 = self.demand_A(p1)
-   #         demandB1, demandB2 = self.demand_B(p1)
-
-   #         eps1.append(demandA1 + demandB1 - self.par.w1A - self.par.w1B)
-   #         eps2.append(demandB1 + demandB2 - self.par.w2A - self.par.w2B)
-   #         p_1.append(p1)   
-
-   #     for price, error1, error2 in zip(p_1, eps1, eps2):
-   #         sign1 = '+' if error1 >= 0 else '-'
-   #         sign2 = '+' if error2 >= 0 else '-'
-
-   #         print(f'For p1 = {price:.2f} epsilon1 = {sign1}{abs(error1):.4f} and epsilon2 = {sign2}{abs(error2):.4f}')
-
     def calc_eps(self, N):
         p1 = 0.5
         i = 1
@@ -133,13 +112,13 @@ class ExchangeEconomyClass:
 
     def plot_eps(self, N):    
         # Get the values of p1, eps1, and eps2
-        p1_values = self.calc_eps(N=75)['p1']
-        eps1_values = self.calc_eps(N=75)['eps1']
-        eps2_values = self.calc_eps(N=75)['eps2']
+        p1_values = self.calc_eps(N = 75)['p1']
+        eps1_values = self.calc_eps(N = 75)['eps1']
+        eps2_values = self.calc_eps(N = 75)['eps2']
 
         # Plot eps1 and eps2 as a function of p1
-        plt.plot(p1_values, eps1_values, label='eps1')
-        plt.plot(p1_values, eps2_values, label='eps2')
+        plt.plot(p1_values, eps1_values, label = 'eps1')
+        plt.plot(p1_values, eps2_values, label = 'eps2')
 
         # Add labels and legend
         plt.xlabel('p1')
@@ -151,11 +130,11 @@ class ExchangeEconomyClass:
 
 ## 4a
     #objective function 
-    def find_prices_4a(self,p1):
+    def find_prices_4a(self, p1):
         par = self.par
         x1A, x2A = self.demand_A(p1)
         x1B, x2B = self.demand_B(p1)
-        return -self.utility_A(1-x1B,1-x2B)
+        return -self.utility_A(1 - x1B, 1 - x2B)
     
     #call solver
     def solve_4a(self):
@@ -166,19 +145,19 @@ class ExchangeEconomyClass:
 
         #unpack solution
         p1_case1 = sol_case1.x
-        x1A_case1,x2A_case1 = self.demand_A(p1_case1)
-        x1B_case1,x2B_case1 = self.demand_B(p1_case1)
-        u = self.utility_A(x1A_case1,x2A_case1)
+        x1A_case1, x2A_case1 = self.demand_A(p1_case1)
+        x1B_case1, x2B_case1 = self.demand_B(p1_case1)
+        u = self.utility_A(x1A_case1, x2A_case1)
         print(f"x1A: {x1A_case1:.4f}, x2A: {x2A_case1:.4f}, x1B: {x1B_case1:.4f}, x2B: {x2B_case1:.4f}, p1: {p1_case1:.4f}, utility: {u:.4f}")
 
         return sol_case1
     
 ## 4b
-    def find_prices_4b(self,p1):
+    def find_prices_4b(self, p1):
         par = self.par
         x1A, x2A = self.demand_A(p1)
         x1B, x2B = self.demand_B(p1)
-        return -self.utility_A(1-x1B,1-x2B)
+        return -self.utility_A(1 - x1B, 1 - x2B)
     
     #call solver
     def solve_4b(self):
@@ -191,7 +170,7 @@ class ExchangeEconomyClass:
         p1_case2 = sol_case2.x
         x1A_case2,x2A_case2 = self.demand_A(p1_case2)
         x1B_case2,x2B_case2 = self.demand_B(p1_case2)
-        u = self.utility_A(x1A_case2,x2A_case2)
+        u = self.utility_A(x1A_case2, x2A_case2)
         print(f"x1A: {x1A_case2:.4f}, x2A: {x2A_case2:.4f}, x1B: {x1B_case2:.4f}, x2B: {x2B_case2:.4f}, p1: {p1_case2:.4f}, utility: {u:.4f}")
 
         return sol_case2
