@@ -174,3 +174,45 @@ class ExchangeEconomyClass:
         print(f"x1A: {x1A_case2:.4f}, x2A: {x2A_case2:.4f}, x1B: {x1B_case2:.4f}, x2B: {x2B_case2:.4f}, p1: {p1_case2:.4f}, utility: {u:.4f}")
 
         return sol_case2
+    
+## 5a    
+    def maximize_utility_A(self, alpha, I, p1):
+        # Define the objective function to maximize utility_A
+        par = self.par
+        x1A, x2A = self.demand_A(p1)
+        x1B, x2B = self.demand_B(p1)
+        return -self.utility_A(1 - x1B, 1 - x2B)
+
+    # Define the constraint that individual B's utility should not decrease
+    def constraint(self, x1A, x2A, x1B, x2B, N):
+        par = self.par,
+        self.demand_A(x1A, x2A) >= self.demand_A(par.w1A, par.w2A),
+        self.demand_B(x1B, x2B) >= self.demand_B(par.w1B, par.w2B),
+        x1B = 1 - x1A,
+        x2B = 1 - x2A,
+        N = 75 # How?
+        #return self.utility_B(x1B, x2B) - self.utility_B(self.par.w1B, self.par.w2B)
+
+        # Define the bounds for x1A x2A
+        self.bound_x1A = (0, i / N)
+        self.bound_x2A = (0, i / N)
+        self.N = 75
+
+        # Use scipy's minimize_scalar to find the maximum utility
+    def solve_5a(self):
+        sol_case3 = optimize.minimize_scalar(
+            self.maximize_utility_A,
+            constraints={'type': 'ineq', 'fun': self.constraint},
+            method='bounded'
+            )
+
+        # Extract the optimal value of x1A
+        #par = self.par
+        x1A_optimal = sol_case3.x
+        x1A_case3,x2A_case3 = self.demand_A(x1A_optimal)
+        x1B_case3,x2B_case3 = self.demand_B(x1A_optimal)
+        u = self.utility_A(x1A_case3, x2A_case3)
+        print(f"x1A: {x1A_case3:.4f}, x2A: {x2A_case3:.4f}, x1B: {x1B_case3:.4f}, x2B: {x2B_case3:.4f}, p1: {x1A_optimal:.4f}, utility: {u:.4f}")
+
+
+        return x1A_optimal
