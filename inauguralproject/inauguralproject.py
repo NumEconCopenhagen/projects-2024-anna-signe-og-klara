@@ -176,26 +176,36 @@ class ExchangeEconomyClass:
 
         return sol_case2
     
-## 5a    
-    def maximize_utility_A(self, alpha, I, p1):
-        # Define the objective function to maximize utility_A
-        par = self.par
-        x1A, x2A = self.demand_A(p1)
-        x1B, x2B = self.demand_B(p1)
-        return -self.utility_A(1 - x1B, 1 - x2B)
-
-        # Use scipy's minimize_scalar to find the maximum utility and call constraints from the definition of the Edgeworth box. 
+## 5a
     def solve_5a(self):
-        sol_case3 = optimize.minimize_scalar(
-            self.maximize_utility_A,
-            self.plot_edgeworth_box
-            )
+        max_utility = -np.inf
+        optimal_price = np.nan
+        x1A_allocation = np.nan
+        x2A_allocation = np.nan
+        x1B_allocation = np.nan
+        x2B_allocation = np.nan
 
-        # Extract the optimal value of x1A
-        x1A_optimal = sol_case3.x
-        x1A_case3, x2A_case3 = self.demand_A(x1A_optimal)
-        x1B_case3, x2B_case3 = self.demand_B(x1A_optimal)
-        u = self.utility_A(x1A_case3, x2A_case3)
-        print(f"x1A: {x1A_case3:.4f}, x2A: {x2A_case3:.4f}, x1B: {x1B_case3:.4f}, x2B: {x2B_case3:.4f}, p1: {x1A_optimal:.4f}, utility: {u:.4f}")
+        x_values = np.linspace(0, 1, 75)
+        for x1 in x_values:
+            for x2 in x_values:
+                utility_A = self.utility_A(x1, x2)
+                utility_B = self.utility_B(1 - x1, 1 - x2)
+                price = self.par.alpha * self.par.w2A / (x1 - self.par.alpha * self.par.w1A)
 
-        return x1A_optimal
+                if utility_A > max_utility and utility_B >= self.utility_B(self.par.w1B, self.par.w2B):
+                    max_utility = utility_A
+                    optimal_price = price
+                    x1A_allocation = x1
+                    x2A_allocation = x2
+                    x1B_allocation = 1 - x1
+                    x2B_allocation = 1 - x2
+
+        iteration_5a_results = {
+            "Optimal Price for Consumer A": f"{optimal_price:.3f}",
+            "Maximum Utility of Consumer A": f"{max_utility:.3f}",
+            "Allocation of x1A": f"{x1A_allocation:.3f}",
+            "Allocation of x2A": f"{x2A_allocation:.3f}",
+            "Allocation of x1B": f"{x1B_allocation:.3f}",
+            "Allocation of x2B": f"{x2B_allocation:.3f}"
+        }
+        return iteration_5a_results
