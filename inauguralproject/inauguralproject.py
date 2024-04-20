@@ -8,9 +8,12 @@ from scipy import optimize
 
 #Defining the class ExchangeEconomyClass
 class ExchangeEconomyClass:
+    results = []
+
     def __init__(self):
 
         par = self.par = SimpleNamespace()
+        
 
 #Defining parameters and endowments
     
@@ -200,6 +203,17 @@ class ExchangeEconomyClass:
                     x1B_allocation = 1 - x1
                     x2B_allocation = 1 - x2
 
+         # Save results for later use
+        results_5a = {
+            "Optimal Price for Consumer A": price,
+            "Maximum Utility of Consumer A": max_utility,
+            "Allocation of x1A": x1A_allocation,
+            "Allocation of x2A": x2A_allocation,
+            "Allocation of x1B": x1B_allocation,
+            "Allocation of x2B": x2B_allocation
+        }
+        self.results.append(results_5a)            
+
         iteration_5a_results = {
             "Optimal Price for Consumer A": f"{optimal_price:.3f}",
             "Maximum Utility of Consumer A": f"{max_utility:.3f}",
@@ -209,3 +223,115 @@ class ExchangeEconomyClass:
             "Allocation of x2B": f"{x2B_allocation:.3f}"
         }
         return iteration_5a_results
+    
+    def solve_5b(self):
+        u_B_initial = np.nan  # Define the missing variable "u_B_initial"
+        optimal_price = np.nan  # Define the missing variable "optimal_price"
+        max_utility = np.nan  # Define the missing variable "max_utility"
+        results = []  # Define the missing variable "results"
+
+        def util_pareto(x):
+            if 1 < x[0] < 0 or 1 < x[1] < 0:
+                return 0
+            return -self.utility_A(x[0], x[1])
+
+        constraint = ({'type': 'ineq', 'fun': lambda x: self.utility_B(1-x[0], 1-x[1]) - u_B_initial})
+        bounds = ( (0,1) , (0,1) )
+
+        # Initialize variables to store maximum utility and corresponding price
+        optimal = optimize.minimize(util_pareto, constraints=constraint, method='SLSQP',x0=[0.5,0.5],bounds=bounds)
+
+        x1A_allocation = optimal.x[0]
+        x2A_allocation = optimal.x[1]
+        x1B_allocation = 1 - optimal.x[0]
+        x2B_allocation = 1 - optimal.x[1]
+
+        # Calculate price that goes along with the allocation
+        price = self.par.alpha*self.par.w2A/(optimal.x[0]-self.par.alpha*self.par.w1A)
+
+      
+        iteration_5b_results = {
+
+            # Print the optimal price and maximum utility
+            "Optimal Price:": price,
+            "Maximum Utility of Consumer A:": self.utility_A(optimal.x[0], optimal.x[1]),
+            # Print the allocations
+            "Allocation of goods for Consumer A:"
+            "Good 1:": x1A_allocation,
+            "Good 2:": x2A_allocation,
+
+            "Allocation of goods for Consumer B:"
+            "Good 1:": x1B_allocation,
+            "Good 2:": x2B_allocation,
+        }
+        return iteration_5b_results
+
+        
+    def solve_6a(self):
+        u_B_initial = np.nan  # Define the missing variable "u_B_initial"
+        def util_planner(x):
+
+            if 1 < x[0] < 0 or 1 < x[1] < 0:
+                return 0
+
+            return - ( self.utility_A(x[0], x[1]) + self.utility_B(1-x[0], 1-x[1]))
+
+        constraint = ({'type': 'ineq', 'fun': lambda x: self.utility_B(1-x[0], 1-x[1]) - u_B_initial})
+        bounds = ( (0,1) , (0,1) )
+
+        # Initialize variables to store maximum utility and corresponding price
+        optimal = optimize.minimize(util_planner, constraints=constraint, method='SLSQP',x0=[0.5,0.5],bounds=bounds)
+
+        x1A_allocation = optimal.x[0]
+        x2A_allocation = optimal.x[1]
+        x1B_allocation = 1 - optimal.x[0]
+        x2B_allocation = 1 - optimal.x[1]
+
+        max_utility = self.utility_A(optimal.x[0], optimal.x[1])
+
+        # Calculate price corresponding to allcoation
+        price = self.par.alpha*self.par.w2A/(optimal.x[0]-self.par.alpha*self.par.w1A)
+
+
+         # Save results for later use
+        results_6b = {
+            "Optimal Price for Consumer A": price,
+            "Maximum Utility of Consumer A": max_utility,
+            "Allocation of x1A": x1A_allocation,
+            "Allocation of x2A": x2A_allocation,
+            "Allocation of x1B": x1B_allocation,
+            "Allocation of x2B": x2B_allocation
+        }
+        self.results.append(results_6b)
+
+        # Print the results
+        iteration_6a_results = {
+            "Optimal Price for Consumer A": price,
+            "Maximum Utility of Consumer A": max_utility,
+            "Allocation of x1A": x1A_allocation,
+            "Allocation of x2A": x2A_allocation,
+            "Allocation of x1B": x1B_allocation,
+            "Allocation of x2B": x2B_allocation
+        }
+        return iteration_6a_results
+    
+        
+
+    
+    def solve_6b(self):
+        import pandas as pd
+
+        # Create an empty DataFrame
+        df = pd.DataFrame(self.results)
+
+        # Your existing code
+        index_labels = ['3', '4a', '4b', '5a', '5b', '6a'] 
+        df.index = index_labels
+        df_rounded = df.round(3)
+        # Print the DataFrame
+
+        iteration_6a_results = {
+        print(df_rounded)
+        }
+        return iteration_6a_results
+
