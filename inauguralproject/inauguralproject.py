@@ -335,4 +335,14 @@ class ExchangeEconomyClass:
         }
         return iteration_6a_results
 
-  
+    # 7. Draw a set W of 50 elements
+    def solve_7(self):
+        par = self.par
+        W = np.random.uniform(0, 1, size=(50, 2)) # draw a set W of 50 elements 
+        # checking the number of elements in W
+        num_elements = W.shape[0] 
+        print(f"The number of elements in W is: {num_elements}")
+        
+        # 8. Find market equilibrium allocation of w1A and w2A
+        
+
