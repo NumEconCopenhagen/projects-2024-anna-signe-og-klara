@@ -339,10 +339,11 @@ class ExchangeEconomyClass:
     def solve_7(self):
         par = self.par
         W = np.random.uniform(0, 1, size=(50, 2)) # draw a set W of 50 elements 
+        num_elements = W.shape[0] # define the number of elements in W
+        for i in range(num_elements): # loop over the elements in W
+            w1A = W[i, 0] # define w1A as the first element in the i-th row of W
+            w2A = W[i, 1] # define w2A as the second element in the i-th row of W
         # checking the number of elements in W
-        num_elements = W.shape[0] 
         print(f"The number of elements in W is: {num_elements}")
-        
-        # 8. Find market equilibrium allocation of w1A and w2A
-        
 
+# 8. Find market equilibrium allocation for each wA in W
