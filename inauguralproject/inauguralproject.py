@@ -181,24 +181,25 @@ class ExchangeEconomyClass:
     
 ## 5a
     def solve_5a(self):
-        max_utility = -np.inf
-        optimal_price = np.nan
+        par = self.par
+        max_utility = -np.inf # initializing the utility to minus infinity, to ensure that finite values found are larger
+        optimal_price = np.nan # initializing the rest of the variables to 'Not a Number' 
         x1A_allocation = np.nan
         x2A_allocation = np.nan
         x1B_allocation = np.nan
         x2B_allocation = np.nan
 
-        x_values = np.linspace(0, 1, 75)
-        for x1 in x_values:
+        x_values = np.linspace(0, 1, 75) # defining the range of x-values from 0 to 1 with 75 intervals
+        for x1 in x_values: # looping over all combinations of x1 and x2 within the defined range
             for x2 in x_values:
                 utility_A = self.utility_A(x1, x2)
-                utility_B = self.utility_B(1 - x1, 1 - x2)
-                price = self.par.alpha * self.par.w2A / (x1 - self.par.alpha * self.par.w1A)
+                utility_B = self.utility_B(1 - x1, 1 - x2) # restricting the x-values for consumer B according to choice set C
+                price = par.alpha * par.w2A / (x1 - par.alpha * par.w1A) # calculating the price
 
-                if utility_A > max_utility and utility_B >= self.utility_B(self.par.w1B, self.par.w2B):
-                    max_utility = utility_A
-                    optimal_price = price
-                    x1A_allocation = x1
+                if utility_A > max_utility and utility_B >= self.utility_B(par.w1B, par.w2B): # checking if the utility is larger than the maximum utility found so far and if the utility of consumer B is larger than the utility of the initial endowment
+                    max_utility = utility_A # when conditions are met, the utility is updated
+                    optimal_price = price # the price and allocations are updated
+                    x1A_allocation = x1 
                     x2A_allocation = x2
                     x1B_allocation = 1 - x1
                     x2B_allocation = 1 - x2
@@ -225,29 +226,30 @@ class ExchangeEconomyClass:
         return iteration_5a_results
     
     def solve_5b(self):
+        par = self.par
         u_B_initial = np.nan  # Define the missing variable "u_B_initial"
         optimal_price = np.nan  # Define the missing variable "optimal_price"
         max_utility = np.nan  # Define the missing variable "max_utility"
         results = []  # Define the missing variable "results"
 
-        def util_pareto(x):
-            if 1 < x[0] < 0 or 1 < x[1] < 0:
-                return 0
-            return -self.utility_A(x[0], x[1])
+        def util_pareto(x): 
+            if 1 < x[0] < 0 or 1 < x[1] < 0: # the function takes a list x of two elements as input and checks if the elements are within the interval [0,1]
+                return 0 # if the elements are not within the interval, the function returns 0
+            return -self.utility_A(x[0], x[1]) # if the elements are within the interval, the function returns the negative utility of consumer A
 
-        constraint = ({'type': 'ineq', 'fun': lambda x: self.utility_B(1-x[0], 1-x[1]) - u_B_initial})
-        bounds = ( (0,1) , (0,1) )
+        constraint = ({'type': 'ineq', 'fun': lambda x: self.utility_B(1-x[0], 1-x[1]) - u_B_initial}) # defining the constraint, that the utility of consumer B must be larger than the endownment
+        bounds = ( (0,1) , (0,1) ) # defining the bounds for the x-values as two tuples
 
         # Initialize variables to store maximum utility and corresponding price
-        optimal = optimize.minimize(util_pareto, constraints=constraint, method='SLSQP',x0=[0.5,0.5],bounds=bounds)
-
-        x1A_allocation = optimal.x[0]
+        optimal = optimize.minimize(util_pareto, constraints=constraint, method='SLSQP',x0=[0.5,0.5],bounds=bounds) # maximizing the util_pareto function with the initial guess of x-values [0.5,0.5] 
+        
+        x1A_allocation = optimal.x[0] # the optimal values calculated are stored
         x2A_allocation = optimal.x[1]
         x1B_allocation = 1 - optimal.x[0]
         x2B_allocation = 1 - optimal.x[1]
 
         # Calculate price that goes along with the allocation
-        price = self.par.alpha*self.par.w2A/(optimal.x[0]-self.par.alpha*self.par.w1A)
+        price = par.alpha*par.w2A/(optimal.x[0]-par.alpha*par.w1A)
 
       
         iteration_5b_results = {
@@ -266,32 +268,32 @@ class ExchangeEconomyClass:
         }
         return iteration_5b_results
 
-        
+ # 6a. Allocation if consumption levels are chosen by a utilitarian social planner        
     def solve_6a(self):
-        u_B_initial = np.nan  # Define the missing variable "u_B_initial"
-        def util_planner(x):
+        par = self.par
+        u_B_initial = np.nan  # define the missing variable "u_B_initial"
+        def util_planner(x): # nested function of social planner's max problem
 
-            if 1 < x[0] < 0 or 1 < x[1] < 0:
-                return 0
+            if 1 < x[0] < 0 or 1 < x[1] < 0: # check if x-values are within the interval [0,1]
+                return 0 # if not, return 0
 
-            return - ( self.utility_A(x[0], x[1]) + self.utility_B(1-x[0], 1-x[1]))
+            return - ( self.utility_A(x[0], x[1]) + self.utility_B(1-x[0], 1-x[1])) # if they are, maximize the sum of utilities of consumer A and B
 
-        constraint = ({'type': 'ineq', 'fun': lambda x: self.utility_B(1-x[0], 1-x[1]) - u_B_initial})
-        bounds = ( (0,1) , (0,1) )
+        constraint = ({'type': 'ineq', 'fun': lambda x: self.utility_B(1-x[0], 1-x[1]) - u_B_initial}) # constraint that the utility of consumer B must be larger than the endowment
+        bounds = ( (0,1) , (0,1) ) # bounds for the x-values
 
         # Initialize variables to store maximum utility and corresponding price
-        optimal = optimize.minimize(util_planner, constraints=constraint, method='SLSQP',x0=[0.5,0.5],bounds=bounds)
+        optimal = optimize.minimize(util_planner, constraints=constraint, method='SLSQP',x0=[0.5,0.5],bounds=bounds) # maximizing the util_planner function with the initial guess of x-values [0.5,0.5]
 
-        x1A_allocation = optimal.x[0]
+        x1A_allocation = optimal.x[0] # store the optimal values
         x2A_allocation = optimal.x[1]
         x1B_allocation = 1 - optimal.x[0]
         x2B_allocation = 1 - optimal.x[1]
 
-        max_utility = self.utility_A(optimal.x[0], optimal.x[1])
+        max_utility = self.utility_A(optimal.x[0], optimal.x[1]) # calculate the maximum utility of consumer A
 
         # Calculate price corresponding to allcoation
-        price = self.par.alpha*self.par.w2A/(optimal.x[0]-self.par.alpha*self.par.w1A)
-
+        price = par.alpha*par.w2A/(optimal.x[0]-par.alpha*par.w1A)
 
          # Save results for later use
         results_6b = {
@@ -315,9 +317,7 @@ class ExchangeEconomyClass:
         }
         return iteration_6a_results
     
-        
-
-    
+ # 6b. Illustrate and compare with other results       
     def solve_6b(self):
         import pandas as pd
 
@@ -335,3 +335,4 @@ class ExchangeEconomyClass:
         }
         return iteration_6a_results
 
+  
