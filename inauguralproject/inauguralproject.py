@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 from types import SimpleNamespace
 import numpy as np
 from scipy import optimize
+import itertools
 
 #Defining the class ExchangeEconomyClass
 class ExchangeEconomyClass:
@@ -377,5 +378,63 @@ class ExchangeEconomyClass:
 
         # Print the number of elements in W
         print(f"\nThe number of elements in W is: {len(W)}")
-
+        
+        return W
 # 8. Find market equilibrium allocation for each wA in W
+
+    # 8. Find market equilibrium allocation for each wA in W
+    def solve_8(self, W):
+        market_equilibrium_allocations_A_all = []
+        market_equilibrium_allocations_B_all = []
+
+        for omega_A in W:
+            N = 75
+            C = set()
+
+            # Generate all possible combinations of x1 and x2
+            for x1, x2 in itertools.product(range(N+1), repeat=2):
+                x1 /= N
+                x2 /= N
+
+                # Check if the allocation satisfies the given conditions for the specified omega_A
+                if (self.utility_A(x1, x2) >= self.utility_A(omega_A[0], omega_A[1]) and
+                    self.utility_B(1 - x1, 1 - x2) >= self.utility_B(omega_A[0], omega_A[1])):
+
+                    # Add the allocation to set C
+                    C.add((x1, x2, 1 - x1, 1 - x2))
+
+            market_equilibrium_allocations_A = []
+            market_equilibrium_allocations_B = []
+
+            for x1, x2, x1B, x2B in C:
+                # Calculate the corresponding allocation for both consumers A and B
+                x1A, x2A = x1, x2
+
+                # Append the allocations
+                market_equilibrium_allocations_A.append((x1A, x2A))
+                market_equilibrium_allocations_B.append((x1B, x2B))
+
+            # Append the market equilibrium allocations for the current omega_A to the lists
+            market_equilibrium_allocations_A_all.append(market_equilibrium_allocations_A)
+            market_equilibrium_allocations_B_all.append(market_equilibrium_allocations_B)
+
+        # Plot the Edgeworth box with market equilibrium allocations for all omega_A values
+        plt.figure(figsize=(8, 6))
+        plt.plot([0, 1], [0, 1], 'k--')  # Diagonal line representing the line of equal division
+        plt.fill_between([0, 1], 0, 1, color='lightgray', alpha=0.5)  # Fill the box with light gray color
+        
+        for market_equilibrium_allocations_A, market_equilibrium_allocations_B in zip(market_equilibrium_allocations_A_all, market_equilibrium_allocations_B_all):
+            for x1A, x2A in market_equilibrium_allocations_A:
+                plt.plot(x1A, x2A, 'ro')  # A's allocations
+            for x1B, x2B in market_equilibrium_allocations_B:
+                plt.plot(x1B, x2B, 'bo')  # B's allocations
+
+        plt.xlabel('Good 1')
+        plt.ylabel('Good 2')
+        plt.title('Edgeworth Box with Market Equilibrium Allocations for $\omega_A \in W$')
+        plt.xlim(0, 1)
+        plt.ylim(0, 1)
+        plt.grid(True)
+        plt.show()
+
+        return market_equilibrium_allocations_A_all, market_equilibrium_allocations_B_all
