@@ -428,10 +428,11 @@ class ExchangeEconomyClass:
 
         plt.xlabel('Good 1')
         plt.ylabel('Good 2')
-        plt.title('Edgeworth Box with Market Equilibrium Allocations for $\omega_A \in W$')
+        plt.title('Edgeworth Box with Market Equilibrium Allocations for $\omega_A \in C$')
         plt.xlim(0, 1)
         plt.ylim(0, 1)
         plt.grid(True)
         plt.show()
 
         return market_equilibrium_allocations_A_all, market_equilibrium_allocations_B_all
+    
