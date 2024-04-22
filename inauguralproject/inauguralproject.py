@@ -8,11 +8,11 @@ from scipy import optimize
 
 #Defining the class ExchangeEconomyClass
 class ExchangeEconomyClass:
-    results = []
 
     def __init__(self):
 
         par = self.par = SimpleNamespace()
+        self.results = []  # Initialize results as an instance variable
         
 
 #Defining parameters and endowments
@@ -132,6 +132,45 @@ class ExchangeEconomyClass:
         # Show the plot
         plt.show()
 
+## 3
+    # Method to find market clearing and print results
+    def solve_3(self, p1_guess=1.0, tolerance=1e-3):
+        clearing_prices = []
+        min_combined_error = float('inf')
+        price = None
+        min_eps1 = None
+        min_eps2 = None
+
+        while p1_guess >= 0:
+            eps1, eps2 = self.check_market_clearing(p1_guess)
+            if abs(eps1) < tolerance and abs(eps2) < tolerance:
+                clearing_prices.append(p1_guess)
+                combined_error = eps1**2 + eps2**2
+                if combined_error < min_combined_error:
+                    min_combined_error = combined_error
+                    price = p1_guess
+                    min_eps1 = eps1
+                    min_eps2 = eps2
+            p1_guess -= 0.001
+
+        if clearing_prices:
+            print(f"Minimum combined error: {min_combined_error} at price: {price:.5f}")
+            print(f"Epsilon1: {min_eps1}, Epsilon2: {min_eps2}")
+        else:
+            print("No price found where the market clears.")
+
+        iteration_3_results = {
+            "Optimal Price for Consumer A": f"{price:.3f}"
+        }
+   
+        # Append the results to a list (assuming it's declared outside this function)
+        self.results.append(iteration_3_results)
+
+        # Optionally, you can return the results dictionary if needed
+        return iteration_3_results
+#5b    
+
+
 ## 4a
     #objective function 
     def find_prices_4a(self, p1):
@@ -183,7 +222,6 @@ class ExchangeEconomyClass:
     def solve_5a(self):
         par = self.par
         max_utility = -np.inf # initializing the utility to minus infinity, to ensure that finite values found are larger
-        optimal_price = np.nan # initializing the rest of the variables to 'Not a Number' 
         x1A_allocation = np.nan
         x2A_allocation = np.nan
         x1B_allocation = np.nan
@@ -204,33 +242,26 @@ class ExchangeEconomyClass:
                     x1B_allocation = 1 - x1
                     x2B_allocation = 1 - x2
 
-         # Save results for later use
-        results_5a = {
-            "Optimal Price for Consumer A": price,
-            "Maximum Utility of Consumer A": max_utility,
-            "Allocation of x1A": x1A_allocation,
-            "Allocation of x2A": x2A_allocation,
-            "Allocation of x1B": x1B_allocation,
-            "Allocation of x2B": x2B_allocation
-        }
-        self.results.append(results_5a)            
-
         iteration_5a_results = {
-            "Optimal Price for Consumer A": f"{optimal_price:.3f}",
+            "Optimal Price for Consumer A": f"{price:.3f}",
             "Maximum Utility of Consumer A": f"{max_utility:.3f}",
             "Allocation of x1A": f"{x1A_allocation:.3f}",
             "Allocation of x2A": f"{x2A_allocation:.3f}",
             "Allocation of x1B": f"{x1B_allocation:.3f}",
             "Allocation of x2B": f"{x2B_allocation:.3f}"
         }
+   
+        # Append the results to a list (assuming it's declared outside this function)
+        self.results.append(iteration_5a_results)
+
+        # Optionally, you can return the results dictionary if needed
         return iteration_5a_results
-    
+#5b    
     def solve_5b(self):
         par = self.par
         u_B_initial = np.nan  # Define the missing variable "u_B_initial"
-        optimal_price = np.nan  # Define the missing variable "optimal_price"
-        max_utility = np.nan  # Define the missing variable "max_utility"
-        results = []  # Define the missing variable "results"
+        price = np.nan  # Define the missing variable "optimal_price"
+        max_utility = -np.inf # initializing the utility to minus infinity, to ensure that finite values found are larger
 
         def util_pareto(x): 
             if 1 < x[0] < 0 or 1 < x[1] < 0: # the function takes a list x of two elements as input and checks if the elements are within the interval [0,1]
@@ -248,30 +279,29 @@ class ExchangeEconomyClass:
         x1B_allocation = 1 - optimal.x[0]
         x2B_allocation = 1 - optimal.x[1]
 
-        # Calculate price that goes along with the allocation
+        # Calculate price that goes along with the allocation and the max utility
+        max_utility = self.utility_A(optimal.x[0], optimal.x[1]) # calculate the maximum utility of consumer A
+
         price = par.alpha*par.w2A/(optimal.x[0]-par.alpha*par.w1A)
 
-      
         iteration_5b_results = {
-
-            # Print the optimal price and maximum utility
-            "Optimal Price:": price,
-            "Maximum Utility of Consumer A:": self.utility_A(optimal.x[0], optimal.x[1]),
-            # Print the allocations
-            "Allocation of goods for Consumer A:"
-            "Good 1:": x1A_allocation,
-            "Good 2:": x2A_allocation,
-
-            "Allocation of goods for Consumer B:"
-            "Good 1:": x1B_allocation,
-            "Good 2:": x2B_allocation,
+            "Optimal Price for Consumer A": f"{price:.3f}",
+            "Maximum Utility of Consumer A": f"{max_utility:.3f}",
+            "Allocation of x1A": f"{x1A_allocation:.3f}",
+            "Allocation of x2A": f"{x2A_allocation:.3f}",
+            "Allocation of x1B": f"{x1B_allocation:.3f}",
+            "Allocation of x2B": f"{x2B_allocation:.3f}"
         }
-        return iteration_5b_results
 
+        # Append the results to a list (assuming it's declared outside this function)
+        self.results.append(iteration_5b_results)
+
+        # Optionally, you can return the results dictionary if needed
+        return iteration_5b_results
+    
  # 6a. Allocation if consumption levels are chosen by a utilitarian social planner        
     def solve_6a(self):
         par = self.par
-        u_B_initial = np.nan  # define the missing variable "u_B_initial"
         def util_planner(x): # nested function of social planner's max problem
 
             if 1 < x[0] < 0 or 1 < x[1] < 0: # check if x-values are within the interval [0,1]
@@ -279,11 +309,10 @@ class ExchangeEconomyClass:
 
             return - ( self.utility_A(x[0], x[1]) + self.utility_B(1-x[0], 1-x[1])) # if they are, maximize the sum of utilities of consumer A and B
 
-        constraint = ({'type': 'ineq', 'fun': lambda x: self.utility_B(1-x[0], 1-x[1]) - u_B_initial}) # constraint that the utility of consumer B must be larger than the endowment
         bounds = ( (0,1) , (0,1) ) # bounds for the x-values
 
         # Initialize variables to store maximum utility and corresponding price
-        optimal = optimize.minimize(util_planner, constraints=constraint, method='SLSQP',x0=[0.5,0.5],bounds=bounds) # maximizing the util_planner function with the initial guess of x-values [0.5,0.5]
+        optimal = optimize.minimize(util_planner, method='SLSQP',x0=[0.5,0.5],bounds=bounds) # maximizing the util_planner function with the initial guess of x-values [0.5,0.5]
 
         x1A_allocation = optimal.x[0] # store the optimal values
         x2A_allocation = optimal.x[1]
@@ -295,55 +324,58 @@ class ExchangeEconomyClass:
         # Calculate price corresponding to allcoation
         price = par.alpha*par.w2A/(optimal.x[0]-par.alpha*par.w1A)
 
-         # Save results for later use
-        results_6b = {
-            "Optimal Price for Consumer A": price,
-            "Maximum Utility of Consumer A": max_utility,
-            "Allocation of x1A": x1A_allocation,
-            "Allocation of x2A": x2A_allocation,
-            "Allocation of x1B": x1B_allocation,
-            "Allocation of x2B": x2B_allocation
-        }
-        self.results.append(results_6b)
-
         # Print the results
         iteration_6a_results = {
-            "Optimal Price for Consumer A": price,
-            "Maximum Utility of Consumer A": max_utility,
-            "Allocation of x1A": x1A_allocation,
-            "Allocation of x2A": x2A_allocation,
-            "Allocation of x1B": x1B_allocation,
-            "Allocation of x2B": x2B_allocation
+            "Optimal Price for Consumer A": f"{price:.3f}",
+            "Maximum Utility of Consumer A": f"{max_utility:.3f}",
+            "Allocation of x1A": f"{x1A_allocation:.3f}",
+            "Allocation of x2A": f"{x2A_allocation:.3f}",
+            "Allocation of x1B": f"{x1B_allocation:.3f}",
+            "Allocation of x2B": f"{x2B_allocation:.3f}"
         }
+         # Append the results to a list (assuming it's declared outside this function)
+        self.results.append(iteration_6a_results)
+
         return iteration_6a_results
     
  # 6b. Illustrate and compare with other results       
     def solve_6b(self):
         import pandas as pd
 
-        # Create an empty DataFrame
-        df = pd.DataFrame(self.results)
+        # Access the results_list variable from the instance
+        results_list = self.results
 
-        # Your existing code
-        index_labels = ['3', '4a', '4b', '5a', '5b', '6a'] 
-        df.index = index_labels
-        df_rounded = df.round(3)
+        # Create a DataFrame from results_list
+        results_df = pd.DataFrame(results_list, columns=[
+            "Optimal Price for Consumer A",
+            "Maximum Utility of Consumer A",
+            "Allocation of x1A",
+            "Allocation of x2A",
+            "Allocation of x1B",
+            "Allocation of x2B"
+        ])
+
+        custom_index_labels = ["3", "5a", "5b", "6a"]  # Customize this list as needed
+
+        results_df.index = custom_index_labels
+
         # Print the DataFrame
+        display(results_df)
 
-        iteration_6a_results = {
-        print(df_rounded)
-        }
-        return iteration_6a_results
+
+
 
     # 7. Draw a set W of 50 elements
     def solve_7(self):
-        par = self.par
-        W = np.random.uniform(0, 1, size=(50, 2)) # draw a set W of 50 elements 
-        num_elements = W.shape[0] # define the number of elements in W
-        for i in range(num_elements): # loop over the elements in W
-            w1A = W[i, 0] # define w1A as the first element in the i-th row of W
-            w2A = W[i, 1] # define w2A as the second element in the i-th row of W
-        # checking the number of elements in W
-        print(f"The number of elements in W is: {num_elements}")
+        # Generate random endowment sets
+        W = np.random.uniform(0, 1, size=(50, 2))  # draw a set W of 50 elements 
+
+        # Print the elements of W
+        print("Elements of W:")
+        for i, (w1A, w2A) in enumerate(W, 1):
+            print(f"Element {i}: w1A = {w1A:.4f}, w2A = {w2A:.4f}")
+
+        # Print the number of elements in W
+        print(f"\nThe number of elements in W is: {len(W)}")
 
 # 8. Find market equilibrium allocation for each wA in W
