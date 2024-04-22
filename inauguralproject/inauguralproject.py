@@ -364,9 +364,7 @@ class ExchangeEconomyClass:
         display(results_df)
 
 
-
-
-    # 7. Draw a set W of 50 elements
+## 7. Draw a set W of 50 elements
     def solve_7(self):
         # Generate random endowment sets
         W = np.random.uniform(0, 1, size=(50, 2))  # draw a set W of 50 elements 
@@ -380,9 +378,8 @@ class ExchangeEconomyClass:
         print(f"\nThe number of elements in W is: {len(W)}")
         
         return W
-# 8. Find market equilibrium allocation for each wA in W
 
-    # 8. Find market equilibrium allocation for each wA in W
+## 8. Find market equilibrium allocation for each wA in W
     def solve_8(self, W):
         market_equilibrium_allocations_A_all = []
         market_equilibrium_allocations_B_all = []
