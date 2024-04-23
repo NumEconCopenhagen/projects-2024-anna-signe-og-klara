@@ -441,3 +441,41 @@ class ExchangeEconomyClass:
 
         return market_equilibrium_allocations_A_all, market_equilibrium_allocations_B_all
     
+    ## 3. Calculating the market clearing price
+    def solve_8a(self, W, p1_guess=1.0, tolerance=1e-3):
+        clearing_prices = []
+        min_combined_error = float('inf')
+        price = None
+        min_eps1 = None
+        min_eps2 = None
+        
+        for w in W:  # Loop over every element in W
+            p1_guess = w  # Set p1_guess to the current element in W
+            
+            while p1_guess >= 0: 
+                eps1, eps2 = self.check_market_clearing(p1_guess)
+                if (abs(eps1) < tolerance).all() and (abs(eps2) < tolerance).all(): 
+                    clearing_prices.append(p1_guess)
+                    combined_error = (eps1**2 + eps2**2).sum()
+                    if combined_error < min_combined_error: 
+                        min_combined_error = combined_error
+                        price = p1_guess
+                        min_eps1 = eps1
+                        min_eps2 = eps2
+ 
+            
+        if clearing_prices:
+            print(f"Minimum combined error: {min_combined_error} at price: {price:.5f}")
+            print(f"Epsilon1: {min_eps1}, Epsilon2: {min_eps2}")
+        else:
+            print("No price found where the market clears.")
+
+        iteration_8a_results = {
+            "Optimal Price for Consumer A": f"{price:.3f}"
+        }
+    
+        self.results.append(iteration_8a_results)
+
+        return iteration_8a_results
+
+#    scatterplot the allocation
