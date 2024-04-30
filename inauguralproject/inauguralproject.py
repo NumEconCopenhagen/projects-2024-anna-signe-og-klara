@@ -384,98 +384,49 @@ class ExchangeEconomyClass:
         
         return W
 
-## 8. Find market equilibrium allocation for each wA in W
-    def solve_8(self, W):
-        market_equilibrium_allocations_A_all = []
-        market_equilibrium_allocations_B_all = []
-
-        for omega_A in W:
-            N = 75
-            C = set()
-
-            # Generate all possible combinations of x1 and x2
-            for x1, x2 in itertools.product(range(N+1), repeat=2):
-                x1 /= N
-                x2 /= N
-
-                # Check if the allocation satisfies the given conditions for the specified omega_A
-                if (self.utility_A(x1, x2) >= self.utility_A(omega_A[0], omega_A[1]) and
-                    self.utility_B(1 - x1, 1 - x2) >= self.utility_B(omega_A[0], omega_A[1])):
-
-                    # Add the allocation to set C
-                    C.add((x1, x2, 1 - x1, 1 - x2))
-
-            market_equilibrium_allocations_A = []
-            market_equilibrium_allocations_B = []
-
-            for x1, x2, x1B, x2B in C:
-                # Calculate the corresponding allocation for both consumers A and B
-                x1A, x2A = x1, x2
-
-                # Append the allocations
-                market_equilibrium_allocations_A.append((x1A, x2A))
-                market_equilibrium_allocations_B.append((x1B, x2B))
-
-            # Append the market equilibrium allocations for the current omega_A to the lists
-            market_equilibrium_allocations_A_all.append(market_equilibrium_allocations_A)
-            market_equilibrium_allocations_B_all.append(market_equilibrium_allocations_B)
-
-        # Plot the Edgeworth box with market equilibrium allocations for all omega_A values
-        plt.figure(figsize=(8, 6))
-        plt.plot([0, 1], [0, 1], 'k--')  # Diagonal line representing the line of equal division
-        plt.fill_between([0, 1], 0, 1, color='lightgray', alpha=0.5)  # Fill the box with light gray color
-        
-        for market_equilibrium_allocations_A, market_equilibrium_allocations_B in zip(market_equilibrium_allocations_A_all, market_equilibrium_allocations_B_all):
-            for x1A, x2A in market_equilibrium_allocations_A:
-                plt.plot(x1A, x2A, 'ro')  # A's allocations
-            for x1B, x2B in market_equilibrium_allocations_B:
-                plt.plot(x1B, x2B, 'bo')  # B's allocations
-
-        plt.xlabel('Good 1')
-        plt.ylabel('Good 2')
-        plt.title('Edgeworth Box with Market Equilibrium Allocations for $\omega_A \in C$')
-        plt.xlim(0, 1)
-        plt.ylim(0, 1)
-        plt.grid(True)
-        plt.show()
-
-        return market_equilibrium_allocations_A_all, market_equilibrium_allocations_B_all
-    
-    ## 3. Calculating the market clearing price
-    def solve_8a(self, W, p1_guess=1.0, tolerance=1e-3):
+    def solve_8a_ny(self, W, tolerance=1e-8):
         clearing_prices = []
+        clearing_allocation = []
         min_combined_error = float('inf')
         price = None
         min_eps1 = None
         min_eps2 = None
-        
-        for w in W:  # Loop over every element in W
-            p1_guess = w  # Set p1_guess to the current element in W
-            
-            while p1_guess >= 0: 
+        eps1 = np.inf
+        eps2 = np.inf
+
+        for wA1, wA2 in W:  # Loop over every element in W
+            p1_guess = (wA1 + wA2) / 2  # Use average of endowments as a starting guess for price
+            self.par.w1A = wA1
+            self.par.w2A = wA2
+            t = 0
+
+            while True:  # Loop until market clears
+                # Find market clearing for the current endowment set
                 eps1, eps2 = self.check_market_clearing(p1_guess)
-                if (abs(eps1) < tolerance).all() and (abs(eps2) < tolerance).all(): 
+
+                # Check if market clearing conditions are met
+                if (abs(eps1) < tolerance) or t >= 500: 
                     clearing_prices.append(p1_guess)
+                    x1A, x2A = self.demand_A(p1_guess)
+                    clearing_allocation.append([x1A, x2A])
                     combined_error = (eps1**2 + eps2**2).sum()
                     if combined_error < min_combined_error: 
                         min_combined_error = combined_error
-                        price = p1_guess
-                        min_eps1 = eps1
-                        min_eps2 = eps2
- 
-            
-        if clearing_prices:
-            print(f"Minimum combined error: {min_combined_error} at price: {price:.5f}")
-            print(f"Epsilon1: {min_eps1}, Epsilon2: {min_eps2}")
-        else:
-            print("No price found where the market clears.")
-
-        iteration_8a_results = {
-            "Optimal Price for Consumer A": f"{price:.3f}"
-        }
+                        #price = p1_guess
+                        #min_eps1 = eps1
+                        #min_eps2 = eps2
+                    break
+                p1_guess = p1_guess + eps1*0.5  # Update price guess
     
-        self.results.append(iteration_8a_results)
+    #    scatterplot the allocation
+        clearing_allocation = np.array(clearing_allocation)
+        plt.scatter(clearing_allocation[:, 1], clearing_allocation[:, 0], label='Allocation')
+        plt.xlabel('Good 2')
+        plt.ylabel('Good 1')
+        plt.title('Allocation of Goods for Consumer A')
+        plt.legend()
+        plt.show()
+            
+        return clearing_allocation
 
-        return iteration_8a_results
 
-#    scatterplot the allocation
