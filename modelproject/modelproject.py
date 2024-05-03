@@ -23,27 +23,30 @@ class HOmodelClass():
         par.Aw = 1          # Productivity for DK
         par.Ax = 1          # Productivity for CN
 
-
         #Defining the initial values
-        Lw = 400           # Labor for DK
-        Lx = 650           # Labor for CN
-        Kw = 700           # Capital for DK
-        Kx = 300           # Capital for CN
+        self.Lw = 400           # Labor for DK
+        self.Lx = 650           # Labor for CN
+        self.Kw = 700           # Capital for DK
+        self.Kx = 300           # Capital for CN
 
-    def equations(self, alpha, beta, phi, psi, w, r, Aw, Ax, Lw, Lx, Kw, Kx):
         #Defining the production functions
-        Yw = lambda Lw, Kw : Aw *(Lw**(1-alpha))*(Kw**alpha)
-        Yx = lambda Lx, Kx : Ax *(Lx**(1-beta))*(Kx**beta)
+        self.Yw = lambda Lw, Kw, : par.Aw *(Lw**(1-par.alpha))*(Kw**par.alpha)
+        self.Yx = lambda Lx, Kx, : par.Ax *(Lx**(1-par.beta))*(Kx**par.beta)
 
-        #Defining the resource constraints
-        Yww_max = Yw(Lw, Kw) #Maximum production for DK of wind (Yww = Production of w from w producer)
-        Yxw_max = Yx(Lw,0, Kw,0) #Maximum production for DK of textile (Yxw = Production of x from w producer)
-        Yxx_max = Yw(Lx, Kx)  #Maximum production for CN of textile (Yxx = Production of x from x producer)
-        Ywx_max = Yx(Lx,0, Kx,0) #Maximum production for CN of wind (Ywx = Production of w from x producer)
+        #Defining the resource constraints #MANGLER 0'er ???
+        self.Yww_max = self.Yw(self.Lw, self.Kw) #Maximum production for DK of wind (Yww = Production of w from w producer)
+        self.Yxw_max = self.Yx(self.Lw, self.Kw) #Maximum production for DK of textile (Yxw = Production of x from w producer)
+        self.Yxx_max = self.Yx(self.Lx, self.Kx)  #Maximum production for CN of textile (Yxx = Production of x from x producer)
+        self.Ywx_max = self.Yw(self.Lx, self.Kx) #Maximum production for CN of wind (Ywx = Production of w from x producer)
 
         #Defining the utility functions
-        Uw = lambda Yw, Yx : Yx**(phi)*Yw**(1-phi) 
-        Ux = lambda Yw, Yx : Yx**(psi)*Yw**(1-psi)
+        self.Uw = lambda Yw, Yx : Yx**(par.phi)*Yw**(1-par.phi) 
+        self.Ux = lambda Yw, Yx : Yx**(par.psi)*Yw**(1-par.psi)
 
-        return Yww_max, Yxw_max, Yxx_max, Ywx_max
+
+        
+
+        print(f"alpha: {par.alpha:.4f}, beta: {par.beta:.4f}, phi: {par.phi:.4f}, psi: {par.psi:.4f}, w: {par.w:.4f}, r: {par.r:.4f}, Aw: {par.Aw:.4f}, Ax: {par.Ax:.4f}, Lw: {self.Lw:.4f}, Lx: {self.Lx:.4f}, Kw: {self.Kw:.4f}, Kx: {self.Kx:.4f}, Uw: {self.Uw(self.Yww_max, self.Yxw_max):.4f}, Ux: {self.Ux(self.Ywx_max, self.Yxx_max):.4f}, Yw: {self.Yw(self.Lw,self.Kw):.4f}, Yx: {self.Yx(self.Lx, self.Kx):.4f}")
+
+        return 
 
