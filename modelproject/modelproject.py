@@ -49,4 +49,41 @@ class HOmodelClass():
         print(f"alpha: {par.alpha:.4f}, beta: {par.beta:.4f}, phi: {par.phi:.4f}, psi: {par.psi:.4f}, w: {par.w:.4f}, r: {par.r:.4f}, Aw: {par.Aw:.4f}, Ax: {par.Ax:.4f}, Lw: {self.Lw:.4f}, Lx: {self.Lx:.4f}, Kw: {self.Kw:.4f}, Kx: {self.Kx:.4f}, Uw: {self.Uw(self.Yww_max, self.Yxw_max):.4f}, Ux: {self.Ux(self.Ywx_max, self.Yxx_max):.4f}, Yw: {self.Yw(self.Lw,self.Kw):.4f}, Yx: {self.Yx(self.Lx, self.Kx):.4f}")
 
         return 
+    
+    def max_utility_without_trade(self):
+        par = self.par 
+
+        Uw_max = -np.inf
+        Ux_max = -np.inf
+        Lw_opt = np.inf
+        Kw_opt = np.inf
+        Lx_opt = np.inf
+        Kx_opt = np.inf
+
+        for l in range (self.Lw):
+            for k in range (self.Kw):
+
+                utility_w = self.Uw(par.phi, l, k)
+                if utility_w > Uw_max:
+                    Uw_max = utility_w
+                    Lw_opt = l
+                    Kw_opt = k
+    
+        for l in range (self.Lx):
+            for k in range (self.kx):
+
+                utility_x = self.Uw(par.psi, l, k)
+                if utility_x > Ux_max:
+                    Ux_max = utility_x
+                    Lx_opt = l
+                    Kx_opt = k
+        
+        print(f"Uw_max: {Uw_max:.4f}, Ux_max: {Ux_max:.4f}")
+        
+        return 
+    
+    
+
+        
+
 
