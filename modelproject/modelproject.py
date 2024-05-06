@@ -35,9 +35,9 @@ class HOmodelClass():
 
         #Defining the resource constraints #MANGLER 0'er ???
         self.Yww_max = self.Yw(self.Lw, self.Kw) #Maximum production for DK of wind (Yww = Production of w from w producer)
-        self.Yxw_max = self.Yx(0,0) #Maximum production for DK of textile (Yxw = Production of x from w producer)
+        self.Yxw_max = self.Yx(self.Lw, self.Kw) #Maximum production for DK of textile (Yxw = Production of x from w producer)
         self.Yxx_max = self.Yx(self.Lx, self.Kx)  #Maximum production for CN of textile (Yxx = Production of x from x producer)
-        self.Ywx_max = self.Yw(0,0) #Maximum production for CN of wind (Ywx = Production of w from x producer)
+        self.Ywx_max = self.Yw(self.Lx, self.Kx) #Maximum production for CN of wind (Ywx = Production of w from x producer)
 
         #Defining the utility functions
         self.Uw = lambda Yw, Yx : Yx**(par.phi)*Yw**(1-par.phi) 
@@ -75,10 +75,14 @@ class HOmodelClass():
                     Ux_max = utility_x
                     Lx_opt = l
                     Kx_opt = k
+
+#Calculation the production based on the optmum values for Lw, Kw, Lx, Kx
+        self.Yw_opt = self.Yw(Lw_opt, Kw_opt)
+        self.Yx_opt = self.Yx(Lx_opt, Kx_opt)
+
+        print(f"Uw_max: {Uw_max:.4f}, Ux_max: {Ux_max:.4f}, Lw_opt: {Lw_opt:.4f}, Lx_opt: {Lx_opt:.4f}, Kw_opt: {Kw_opt:.4f}, Kx_opt: {Kx_opt:.4f}, Yw_opt: {self.Yw_opt:.4f}, Yx_opt: {self.Yx_opt:.4f}")
         
-        print(f"Uw_max: {Uw_max:.4f}, Ux_max: {Ux_max:.4f}, Lw_opt: {Lw_opt:.4f}, Lx_opt: {Lx_opt:.4f}, Kw_opt: {Kw_opt:.4f}, Kx_opt: {Kx_opt:.4f}")
-        
-        return Lw_opt, Kw_opt, Lx_opt, Kx_opt
+        return #round(Lw_opt, 2), round(Kw_opt, 2), round(Lx_opt, 2), round(Kx_opt, 2), round(self.Yw_opt, 2), round(self.Yx_opt, 2)
     
     
 
