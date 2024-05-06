@@ -84,8 +84,54 @@ class HOmodelClass():
         
         return #round(Lw_opt, 2), round(Kw_opt, 2), round(Lx_opt, 2), round(Kx_opt, 2), round(self.Yw_opt, 2), round(self.Yx_opt, 2)
     
-    
+    def capital_labor_ratio(self):
+        par = self.par
 
+        #Firstly we define the capital-labor ratio for each country
+        KLr_w= self.Kw/self.Lw
+        KLr_x= self.Kx/self.Lx
         
+        #We define wether the countries are capital abundant or labor abundant
+        if KLr_w > KLr_x:
+            print("Denmark is capital abundant")
+            print("China is labor abundant")
+        else:
+            print("Denmark is labor abundant")
+            print("China is capital abundant")
+        
+        return
+    
+    def max_utility_with_trade(self):
+        par = self.par
+        #Firstly we define the prices of the goods
+        par.pw = 1.2  # Price of wind in international market
+        par.px = 0.8  # Price of textile in international market
 
+        #Then we update the utility functions to include the prices defined above
+        self.Uw = lambda Yw, Yx : Yx**(par.phi) * Yw**(1-par.phi) * par.pw
+        self.Ux = lambda Yw, Yx : Yx**(par.psi) * Yw**(1-par.psi) * par.px
 
+        # Then we modify the opmization process, where we optimize consumption considering both domestic and imported goods. 
+        # For simplicity, let's assume each country can import any amount of goods at the given international prices.
+
+        Uw_max = -np.inf
+        Ux_max = -np.inf
+        Lw_opt = 0
+        Kw_opt = 0
+        Lx_opt = 0
+        Kx_opt = 0
+
+        for l in range(self.Lw):
+            for k in range(self.Kw):
+                for l_import in range(self.Lx):
+                    for k_import in range(self.Kx):
+                        utility_w = self.Uw(self.Yw(l, k), self.Yx(l_import, k_import))
+                        if utility_w > Uw_max:
+                            Uw_max = utility_w
+                            Lw_opt = l
+                            Kw_opt = k
+                            Lx_opt = l_import
+                            Kx_opt = k_import
+
+     
+        return Uw_max, Ux_max, Lw_opt, Kw_opt, Lx_opt, Kx_opt
