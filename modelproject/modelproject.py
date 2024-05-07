@@ -33,8 +33,8 @@ class HOmodelClass():
         self.Kx = 300           # Capital for CN
 
         #Defining the production functions
-        self.Yw = lambda Lw, Kw, : par.Aw *(Lw**(1-par.alpha))*(Kw**par.alpha)
-        self.Yx = lambda Lx, Kx, : par.Ax *(Lx**(1-par.beta))*(Kx**par.beta)
+        self.Yw = lambda Lw, Kw, : par.Aw *((Lw**(1-par.alpha))*(Kw**par.alpha) if Lw >= 0 and Kw >= 0 else np.nan)
+        self.Yx = lambda Lx, Kx, : par.Ax *((Lx**(1-par.beta))*(Kx**par.beta) if Lx >= 0 and Kx >= 0 else np.nan)
 
         #Defining the resource constraints #MANGLER 0'er ???
         self.Yww_max = self.Yw(self.Lw, self.Kw) #Maximum production for DK of wind (Yww = Production of w from w producer)
@@ -43,8 +43,8 @@ class HOmodelClass():
         self.Ywx_max = self.Yw(self.Lx, self.Kx) #Maximum production for CN of wind (Ywx = Production of w from x producer)
 
         #Defining the utility functions
-        self.Uw = lambda Yw, Yx : Yx**(par.phi)*Yw**(1-par.phi) 
-        self.Ux = lambda Yw, Yx : Yx**(par.psi)*Yw**(1-par.psi)
+        self.Uw = lambda Yw, Yx : (Yx**(par.phi)*Yw**(1-par.phi)) if Yw >= 0 and Yx >= 0 else np.nan
+        self.Ux = lambda Yw, Yx : (Yx**(par.psi)*Yw**(1-par.psi)) if Yw >= 0 and Yx >= 0 else np.nan
 
         print(f"alpha: {par.alpha:.4f}, beta: {par.beta:.4f}, phi: {par.phi:.4f}, psi: {par.psi:.4f}, w: {par.w:.4f}, r: {par.r:.4f}, Aw: {par.Aw:.4f}, Ax: {par.Ax:.4f}")
 
@@ -271,3 +271,36 @@ class HOmodelClass():
         plt.show()
 
         print(f"Max Utility Point for {country}: Labor={max_utility_point[0]}, Capital={max_utility_point[1]}, Utility={utility[max_utility_index]}")
+
+        return
+    def plot_ppf(self):
+        # Calculate production possibilities before trade
+        Yw_DK_before = self.Yw(self.Lw, self.Kw)
+        Yx_DK_before = self.Yx(self.Lw, self.Kw)
+        Yw_CN_before = self.Yw(self.Lx, self.Kx)
+        Yx_CN_before = self.Yx(self.Lx, self.Kx)
+
+        # Calculate production possibilities after trade
+        result = self.optimize_production_with_trade()
+        # Calculate production possibilities after trade
+        Yw_DK_after, Yx_DK_after, Yw_CN_after, Yx_CN_after = result
+        #Yw_DK_after = result[0]
+        #Yx_DK_after = result[1]
+        #Yw_CN_after = result[2]
+        #Yx_CN_after = result[3]
+
+        # Plot PPFs
+        plt.figure(figsize=(10, 6))
+        plt.plot([0, Yw_DK_before], [Yx_DK_before, 0], label='Denmark PPF Before Trade', color='blue')
+        plt.plot([0, Yw_CN_before], [Yx_CN_before, 0], label='China PPF Before Trade', color='red')
+        plt.plot([0, Yw_DK_after], [Yx_DK_after, 0], label='Denmark PPF After Trade', color='lightblue', linestyle='--')
+        plt.plot([0, Yw_CN_after], [Yx_CN_after, 0], label='China PPF After Trade', color='salmon', linestyle='--')
+        plt.title('Production Possibility Frontier (PPF)')
+        plt.xlabel('Wind Production')
+        plt.ylabel('Textile Production')
+        plt.legend()
+        plt.grid(True)
+        plt.show()
+
+        # Return the production levels as a tuple
+        return Yw_DK_after, Yx_DK_after, Yw_CN_after, Yx_CN_after
