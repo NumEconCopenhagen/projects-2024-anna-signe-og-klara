@@ -17,20 +17,25 @@ class HOmodelClass():
 
         #Baseline parameters are defined
         #Defining parametervalues the economy and initial values
-        par.alpha = 1/3    # weight on capital for Denmarks (DK) production
-        par.beta = 2/3     # weight on capital for Chinas (CN) production
-        par.phi = 0.6       # Substitutionelasticity between the two goods for DK(CES-function)
-        par.psi = 1       # Substitutionelasticity between the two goods for CN (CES-function)
+        par.alpha = 2/3    # weight on capital for Denmarks (DK) production
+        par.beta = 1/3     # weight on capital for Chinas (CN) production
+        par.phi = 0.8       # Substitutionelasticity between the two goods for DK(CES-function)
+        par.psi = 0.8       # Substitutionelasticity between the two goods for CN (CES-function)
         par.w = 1           # Wage
         par.r = 0.05        # Interest rate
         par.Aw = 1          # Productivity for DK
         par.Ax = 1          # Productivity for CN
 
         #Defining the initial values
-        self.Lw = 300           # Labor for DK
-        self.Lx = 1000           # Labor for CN
-        self.Kw = 1000           # Capital for DK
-        self.Kx = 300           # Capital for CN
+#        self.Lw = 300           # Labor for DK
+#        self.Lx = 1000           # Labor for CN
+#        self.Kw = 1000           # Capital for DK
+#        self.Kx = 300           # Capital for CN
+
+        self.Kw = 1000  # Capital for DK (increased)
+        self.Kx = 300   # Capital for CN
+        self.Lw = 300   # Labor for DK (increased)
+        self.Lx = 1000  # Labor for CN
 
         #Defining the production functions
         self.Yw = lambda Lw, Kw, : par.Aw *((Lw**(1-par.alpha))*(Kw**par.alpha) if Lw >= 0 and Kw >= 0 else np.nan)
@@ -123,10 +128,10 @@ class HOmodelClass():
                        {'type': 'eq', 'fun': lambda x: self.Yx(self.Lx, self.Kx) - x[3] - x[1]})  # Textile production constraint
 
         # Optimization
-#        result = minimize(objective_function, x0, constraints=constraints)
+        result = minimize(objective_function, x0, constraints=constraints)
 #        result = minimize(self.Uw, x0, constraints=constraints)
  
-        result = minimize(lambda x: -(self.Uw(self.Yw(x[0], x[1]), self.Yx(x[2], x[3])) + self.Ux(self.Yw(self.Lx - x[2], self.Kx - x[3]), self.Yx(x[2], x[3]))), x0, constraints=constraints)
+ #       result = minimize(lambda x: -(self.Uw(self.Yw(x[0], x[1]), self.Yx(x[2], x[3])) + self.Ux(self.Yw(self.Lx - x[2], self.Kx - x[3]), self.Yx(x[2], x[3]))), x0, constraints=constraints)
 
 
         Yw_DK = result.x[0]
@@ -205,7 +210,9 @@ class HOmodelClass():
                     {'type': 'eq', 'fun': lambda x: self.Yx(self.Lx, self.Kx) - x[3] - x[1]})  # Textile production constraint
 
         # Optimization using fsolve (analytical solution)
+
         result = fsolve(lambda x: -np.array([self.Uw(x[0], x[1]) + self.Ux(x[2], x[3]), 0, 0, 0]), x0)
+#        result = fsolve(objective_function, 0, 0, 0]), x0)
 
         Yw_DK = result[0]
         Yx_DK = result[1]
