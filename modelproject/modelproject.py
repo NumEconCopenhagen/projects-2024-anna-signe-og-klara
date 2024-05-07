@@ -164,13 +164,7 @@ class HOmodelClass():
         constraints = ({'type': 'eq', 'fun': production_constraint})
 
         # Optimization using fsolve (analytical solution)
-        result = fsolve(lambda x: -np.array([self.Yw(x[0], x[1]) + self.Yx(x[2], x[3]), 0, 0, 0]), x0)
-
-#        result = minimize(objective_function, x0, constraints=constraints)
-#        result = minimize(self.Uw, x0, constraints=constraints)
- 
-#        result = minimize(lambda x: -(self.Uw(self.Yw(x[0], x[1]), self.Yx(x[2], x[3])) + self.Ux(self.Yw(self.Lx - x[2], self.Kx - x[3]), self.Yx(x[2], x[3]))), x0, constraints=constraints)
-
+        result = fsolve(lambda x: -np.array([self.Uw(x[0], x[1]) + self.Ux(x[2], x[3]), 0, 0, 0]), x0)
 
         Yw_DK = self.Yw(result[0], result[1])
         Yx_DK = self.Yx(result[2], result[3])
@@ -211,7 +205,7 @@ class HOmodelClass():
                     {'type': 'eq', 'fun': lambda x: self.Yx(self.Lx, self.Kx) - x[3] - x[1]})  # Textile production constraint
 
         # Optimization using fsolve (analytical solution)
-        result = fsolve(objective_function, x0)
+        result = fsolve(lambda x: -np.array([self.Uw(x[0], x[1]) + self.Ux(x[2], x[3]), 0, 0, 0]), x0)
 
         Yw_DK = result[0]
         Yx_DK = result[1]
