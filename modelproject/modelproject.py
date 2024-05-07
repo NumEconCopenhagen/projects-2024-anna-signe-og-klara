@@ -27,10 +27,10 @@ class HOmodelClass():
         par.Ax = 1          # Productivity for CN
 
         #Defining the initial values
-        self.Lw = 800           # Labor for DK
+        self.Lw = 300           # Labor for DK
         self.Lx = 1000           # Labor for CN
         self.Kw = 1000           # Capital for DK
-        self.Kx = 800           # Capital for CN
+        self.Kx = 300           # Capital for CN
 
         #Defining the production functions
         self.Yw = lambda Lw, Kw, : par.Aw *(Lw**(1-par.alpha))*(Kw**par.alpha)
@@ -77,9 +77,12 @@ class HOmodelClass():
         # Constraints
         constraints = ({'type': 'eq', 'fun': production_constraint})
 
+
+        result = minimize(lambda x: -(self.Uw(self.Yw(x[0], x[1]), self.Yx(x[2], x[3])) + self.Ux(self.Yw(self.Lx - x[2], self.Kx - x[3]), self.Yx(x[2], x[3]))), x0, constraints=constraints)
         # Optimization
-        result = minimize(lambda x: -(self.Yw(x[0], x[1]) + self.Yx(x[2], x[3])), x0, constraints=constraints)
-        
+        #result = minimize(lambda x: -(self.Yw(x[0], x[1]) + self.Yx(x[2], x[3])), x0, constraints=constraints)
+        #result = -minimize(self.Uw, x0, constraints=constraints)
+
         Yw_DK = self.Yw(result.x[0], result.x[1])
         Yx_DK = self.Yx(result.x[2], result.x[3])
         utility_DK = self.Uw(Yw_DK, Yx_DK)
@@ -97,6 +100,8 @@ class HOmodelClass():
         print("Capital CN: ", round(result.x[3], 2))
         print("Yw DK:      ", round(Yw_DK, 2))
         print("Yx DK:      ", round(Yx_DK, 2))
+        print("Yw CN:      ", round(Yw_CN, 2))
+        print("Yx CN:      ", round(Yx_CN, 2))
         print("Utility DK: ", round(utility_DK, 2))
         print("Utility CN: ", round(utility_CN, 2))
         return
@@ -118,7 +123,11 @@ class HOmodelClass():
                        {'type': 'eq', 'fun': lambda x: self.Yx(self.Lx, self.Kx) - x[3] - x[1]})  # Textile production constraint
 
         # Optimization
-        result = minimize(objective_function, x0, constraints=constraints)
+#        result = minimize(objective_function, x0, constraints=constraints)
+#        result = minimize(self.Uw, x0, constraints=constraints)
+ 
+        result = minimize(lambda x: -(self.Uw(self.Yw(x[0], x[1]), self.Yx(x[2], x[3])) + self.Ux(self.Yw(self.Lx - x[2], self.Kx - x[3]), self.Yx(x[2], x[3]))), x0, constraints=constraints)
+
 
         Yw_DK = result.x[0]
         Yx_DK = result.x[1]
@@ -136,6 +145,8 @@ class HOmodelClass():
         print("Capital CN: ", round(result.x[3], 2))
         print("Yw DK:      ", round(Yw_DK, 2))
         print("Yx DK:      ", round(Yx_DK, 2))
+        print("Yw CN:      ", round(Yw_CN, 2))
+        print("Yx CN:      ", round(Yx_CN, 2))
         print("Utility DK: ", round(utility_DK, 2))
         print("Utility CN: ", round(utility_CN, 2))
         # Return the results
@@ -154,6 +165,12 @@ class HOmodelClass():
 
         # Optimization using fsolve (analytical solution)
         result = fsolve(lambda x: -np.array([self.Yw(x[0], x[1]) + self.Yx(x[2], x[3]), 0, 0, 0]), x0)
+
+#        result = minimize(objective_function, x0, constraints=constraints)
+#        result = minimize(self.Uw, x0, constraints=constraints)
+ 
+#        result = minimize(lambda x: -(self.Uw(self.Yw(x[0], x[1]), self.Yx(x[2], x[3])) + self.Ux(self.Yw(self.Lx - x[2], self.Kx - x[3]), self.Yx(x[2], x[3]))), x0, constraints=constraints)
+
 
         Yw_DK = self.Yw(result[0], result[1])
         Yx_DK = self.Yx(result[2], result[3])
