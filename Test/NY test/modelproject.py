@@ -59,18 +59,18 @@ class HOmodelClass:
         else:
             raise Exception("Optimization failed: " + result.message)
 
-
-
-
-    def before_trade(self): # Calculate production and utility before trade
+    def before_trade(self):
         prod_DK_W = self.production(self.K_DK, self.L_DK, self.alpha_DK_W, self.beta_DK_W)
         prod_CN_T = self.production(self.K_CN, self.L_CN, self.alpha_CN_T, self.beta_CN_T)
-        U_DK = self.utility(prod_DK_W, 0, self.rho)  # Assuming only Windmills contribute to utility
-        U_CN = self.utility(0, prod_CN_T, self.rho)  # Assuming only Textiles contribute to utility
+        U_DK = self.utility(prod_DK_W, 0, self.rho)  # Assuming only Windmills contribute to utility in Denmark
+        U_CN = self.utility(0, prod_CN_T, self.rho)  # Assuming only Textiles contribute to utility in China
+
         return {
-            'DK': {'Production_W': prod_DK_W, 'Production_T': 0, 'Utility': U_DK, 'Capital': self.K_DK, 'Labor': self.L_DK},
-            'CN': {'Production_W': 0, 'Production_T': prod_CN_T, 'Utility': U_CN, 'Capital': self.K_CN, 'Labor': self.L_CN}
-        }
+            'DK': {'K_Windmills': self.K_DK, 'L_Windmills': self.L_DK, 'K_Textiles': 0, 'L_Textiles': 0,
+                'Production_Windmills': prod_DK_W, 'Production_Textiles': 0},
+            'CN': {'K_Windmills': 0, 'L_Windmills': 0, 'K_Textiles': self.K_CN, 'L_Textiles': self.L_CN,
+                'Production_Windmills': 0, 'Production_Textiles': prod_CN_T}
+        }, U_DK, U_CN
 
 
     def separate_utilities(self, x):
