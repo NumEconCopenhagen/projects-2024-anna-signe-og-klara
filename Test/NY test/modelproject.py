@@ -106,31 +106,6 @@ class HOmodelClass:
         U_CN = self.utility(prod_CN_T + prod_CN_W, prod_DK_T + prod_DK_W, self.rho) # Utility for China
         return U_DK, U_CN
     
-    def analyze_equilibrium(self):
-        # Define symbols
-        K_DK, L_DK, K_CN, L_CN, p_W, p_T = sp.symbols('K_DK L_DK K_CN L_CN p_W p_T')
-        K_DK, L_DK, K_CN, L_CN = sp.symbols('K_DK L_DK K_CN L_CN', positive=True)
-        alpha_DK_W, beta_DK_W = self.alpha_DK_W, self.beta_DK_W
-        alpha_CN_T, beta_CN_T = self.alpha_CN_T, self.beta_CN_T
-
-        # Production functions
-        prod_DK_W = K_DK**alpha_DK_W * L_DK**beta_DK_W
-        prod_CN_T = K_CN**alpha_CN_T * L_CN**beta_CN_T
-
-        # Assume total demand for Windmills and Textiles is some fixed amount
-        demand_W, demand_T = sp.symbols('demand_W demand_T')
-
-        # Market-clearing conditions
-        market_clearing_W = sp.Eq(prod_DK_W, demand_W)
-        market_clearing_T = sp.Eq(prod_CN_T, demand_T)
-
-        # Solve for equilibrium conditions
-        sol = sp.solve([K_DK + K_CN - self.K_DK, L_DK + L_CN - self.L_DK,
-                        market_clearing_W, market_clearing_T], 
-                        (K_DK, L_DK, K_CN, L_CN), dict=True)
-
-        return sol
-    
     def plot_trade_results(self):
         # Get the results before trade
         before_trade_results, U_DK_before, U_CN_before = self.before_trade()
@@ -343,31 +318,6 @@ class HOmodelClass:
         U_DK = self.utility_ces(prod_DK_W + prod_CN_W, prod_DK_T + prod_CN_T, self.rho) # Utility for Denmark
         U_CN = self.utility_ces(prod_CN_T + prod_CN_W, prod_DK_T + prod_DK_W, self.rho) # Utility for China
         return U_DK, U_CN
-    
-    def analyze_equilibrium_ces(self):
-        # Define symbols
-        K_DK, L_DK, K_CN, L_CN, p_W, p_T = sp.symbols('K_DK L_DK K_CN L_CN p_W p_T')
-        K_DK, L_DK, K_CN, L_CN = sp.symbols('K_DK L_DK K_CN L_CN', positive=True)
-        alpha_DK_W, beta_DK_W = self.alpha_DK_W, self.beta_DK_W
-        alpha_CN_T, beta_CN_T = self.alpha_CN_T, self.beta_CN_T
-
-        # Production functions
-        prod_DK_W = K_DK**alpha_DK_W * L_DK**beta_DK_W
-        prod_CN_T = K_CN**alpha_CN_T * L_CN**beta_CN_T
-
-        # Assume total demand for Windmills and Textiles is some fixed amount
-        demand_W, demand_T = sp.symbols('demand_W demand_T')
-
-        # Market-clearing conditions
-        market_clearing_W = sp.Eq(prod_DK_W, demand_W)
-        market_clearing_T = sp.Eq(prod_CN_T, demand_T)
-
-        # Solve for equilibrium conditions
-        sol = sp.solve([K_DK + K_CN - self.K_DK, L_DK + L_CN - self.L_DK,
-                        market_clearing_W, market_clearing_T], 
-                        (K_DK, L_DK, K_CN, L_CN), dict=True)
-
-        return sol
     
     def plot_trade_results_ces(self):
         # Get the results before trade
