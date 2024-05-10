@@ -145,36 +145,23 @@ class HOmodelClass:
         if allocations:
             # Data Preparation
             labels = ['Denmark', 'China']
-            production_windmills = [before_trade_results['DK']['Production_Windmills'], 0,
-                                    allocations['DK']['Production_Windmills'], allocations['CN']['Production_Windmills']]
-            production_textiles = [0, before_trade_results['CN']['Production_Textiles'],
-                                allocations['DK']['Production_Textiles'], allocations['CN']['Production_Textiles']]
-            utility = [U_DK_before, U_CN_before, U_DK, U_CN]
+            utility = [U_DK_before, U_DK, U_CN_before, U_CN]
             
             x = np.arange(len(labels))  # Label locations
             width = 0.35  # Width of the bars
+            offset = width / 2  # Offset for side-by-side bar placement
 
-            fig, ax = plt.subplots(2, 1, figsize=(10, 10))
-
-            # Production Plot
-            rects1 = ax[0].bar(x - width/2, production_windmills[::2], width, label='Windmills')
-            rects2 = ax[0].bar(x + width/2, production_textiles[::2], width, label='Textiles')
-            rects3 = ax[0].bar(x - width/2, production_windmills[1::2], width, bottom=production_windmills[::2], label='Windmills After Trade', alpha=0.5)
-            rects4 = ax[0].bar(x + width/2, production_textiles[1::2], width, bottom=production_textiles[::2], label='Textiles After Trade', alpha=0.5)
-
-            ax[0].set_ylabel('Production')
-            ax[0].set_title('Production by Country and Good')
-            ax[0].set_xticks(x)
-            ax[0].set_xticklabels(labels)
-            ax[0].legend()
+            fig, ax = plt.subplots(figsize=(10, 5))
 
             # Utility Plot
-            rects5 = ax[1].bar(labels, utility[:2], width, label='Utility Before Trade')
-            rects6 = ax[1].bar(labels, utility[2:], width, bottom=utility[:2], label='Utility After Trade', alpha=0.5)
+            ax.bar(x - offset, utility[::2], width, label='Utility Before Trade')
+            ax.bar(x + offset, utility[1::2], width, label='Utility After Trade', alpha=0.5)
 
-            ax[1].set_ylabel('Utility')
-            ax[1].set_title('Utility by Country Before and After Trade')
-            ax[1].legend()
+            ax.set_ylabel('Utility')
+            ax.set_title('Utility by Country Before and After Trade')
+            ax.set_xticks(x)
+            ax.set_xticklabels(labels)
+            ax.legend()
 
             plt.tight_layout()
             plt.show()
@@ -399,36 +386,23 @@ class HOmodelClass:
         if allocations:
             # Data Preparation
             labels = ['Denmark', 'China']
-            production_windmills = [before_trade_results['DK']['Production_Windmills'], 0,
-                                    allocations['DK']['Production_Windmills'], allocations['CN']['Production_Windmills']]
-            production_textiles = [0, before_trade_results['CN']['Production_Textiles'],
-                                allocations['DK']['Production_Textiles'], allocations['CN']['Production_Textiles']]
-            utility = [U_DK_before, U_CN_before, U_DK, U_CN]
+            utility = [U_DK_before, U_DK, U_CN_before, U_CN]
             
             x = np.arange(len(labels))  # Label locations
             width = 0.35  # Width of the bars
+            offset = width / 2  # Offset for side-by-side bar placement
 
-            fig, ax = plt.subplots(2, 1, figsize=(10, 10))
-
-            # Production Plot
-            rects1 = ax[0].bar(x - width/2, production_windmills[::2], width, label='Windmills')
-            rects2 = ax[0].bar(x + width/2, production_textiles[::2], width, label='Textiles')
-            rects3 = ax[0].bar(x - width/2, production_windmills[1::2], width, bottom=production_windmills[::2], label='Windmills After Trade', alpha=0.5)
-            rects4 = ax[0].bar(x + width/2, production_textiles[1::2], width, bottom=production_textiles[::2], label='Textiles After Trade', alpha=0.5)
-
-            ax[0].set_ylabel('Production CES')
-            ax[0].set_title('Production by Country and Good')
-            ax[0].set_xticks(x)
-            ax[0].set_xticklabels(labels)
-            ax[0].legend()
+            fig, ax = plt.subplots(figsize=(10, 5))
 
             # Utility Plot
-            rects5 = ax[1].bar(labels, utility[:2], width, label='Utility Before Trade')
-            rects6 = ax[1].bar(labels, utility[2:], width, bottom=utility[:2], label='Utility After Trade', alpha=0.5)
+            ax.bar(x - offset, utility[::2], width, label='Utility Before Trade')
+            ax.bar(x + offset, utility[1::2], width, label='Utility After Trade', alpha=0.5)
 
-            ax[1].set_ylabel('Utility')
-            ax[1].set_title('Utility by Country Before and After Trade')
-            ax[1].legend()
+            ax.set_ylabel('Utility')
+            ax.set_title('Utility by Country Before and After Trade')
+            ax.set_xticks(x)
+            ax.set_xticklabels(labels)
+            ax.legend()
 
             plt.tight_layout()
             plt.show()
