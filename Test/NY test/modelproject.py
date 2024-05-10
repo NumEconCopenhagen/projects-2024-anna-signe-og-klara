@@ -232,6 +232,46 @@ class HOmodelClass:
         plt.legend()
         plt.show()
 
+    # Generating PPF's for the two countries. 
+    def generate_ppf_data(self, K_total, L_total, alpha_W, beta_W, alpha_T, beta_T):
+        windmill_production = []
+        textile_production = []
+
+        # Varying capital allocation to windmills from 0 to K_total
+        for K_windmills in np.linspace(0, K_total, 100):
+            K_textiles = K_total - K_windmills
+            L_windmills = L_total * (K_windmills / K_total)  # Assuming proportional allocation of labor
+            L_textiles = L_total - L_windmills
+
+            # Calculate production of windmills and textiles
+            prod_windmills = self.production(K_windmills, L_windmills, alpha_W, beta_W)
+            prod_textiles = self.production(K_textiles, L_textiles, alpha_T, beta_T)
+
+            windmill_production.append(prod_windmills)
+            textile_production.append(prod_textiles)
+
+        return windmill_production, textile_production
+
+    def plot_ppf(self):
+        # Generate PPF data for Denmark
+        windmill_prod_DK, textile_prod_DK = self.generate_ppf_data(
+            self.K_DK, self.L_DK, self.alpha_DK_W, self.beta_DK_W, self.alpha_CN_T, self.beta_CN_T)
+        
+        # Generate PPF data for China
+        windmill_prod_CN, textile_prod_CN = self.generate_ppf_data(
+            self.K_CN, self.L_CN, self.alpha_DK_W, self.beta_DK_W, self.alpha_CN_T, self.beta_CN_T)
+
+        # Plotting the PPFs on the same graph
+        plt.figure(figsize=(8, 6))
+        plt.plot(windmill_prod_DK, textile_prod_DK, label='PPF of Denmark')
+        plt.plot(windmill_prod_CN, textile_prod_CN, label='PPF of China', linestyle='--')
+        plt.xlabel('Production of Windmills')
+        plt.ylabel('Production of Textiles')
+        plt.title('Production Possibility Frontier (PPF) for Denmark and China')
+        plt.legend()
+        plt.grid(True)
+        plt.show()
+
 
 
 #
@@ -446,7 +486,7 @@ class HOmodelClass:
         plt.legend()
         plt.show()
 
-    def generate_ppf_data(self, K_total, L_total, alpha_W, alpha_T, rho):
+    def generate_ppf_data_ces(self, K_total, L_total, alpha_W, alpha_T, rho):
         windmill_production = []
         textile_production = []
 
@@ -465,13 +505,13 @@ class HOmodelClass:
 
         return windmill_production, textile_production
 
-    def plot_ppf(self):
+    def plot_ppf_ces(self):
         # Generate PPF data for Denmark
-        windmill_prod_DK, textile_prod_DK = self.generate_ppf_data(
+        windmill_prod_DK, textile_prod_DK = self.generate_ppf_data_ces(
             self.K_DK, self.L_DK, self.alpha_DK_W, self.alpha_CN_T, self.rho)
         
         # Generate PPF data for China
-        windmill_prod_CN, textile_prod_CN = self.generate_ppf_data(
+        windmill_prod_CN, textile_prod_CN = self.generate_ppf_data_ces(
             self.K_CN, self.L_CN, self.alpha_DK_W, self.alpha_CN_T, self.rho)
 
         # Plotting the PPFs on the same graph
