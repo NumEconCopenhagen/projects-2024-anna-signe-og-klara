@@ -141,39 +141,30 @@ class HOmodelClass:
             plt.tight_layout()
             plt.show()
     
-    def plot_parameter_effect(self, parameter_values, parameter_name, result_type='utility'):
-        results = []
+
+    def plot_parameter_effect_combined(self, parameter_values, parameter_type, result_type='utility'):
+        results_DK = []
+        results_CN = []
         for value in parameter_values:
-            if parameter_name == 'alpha_DK_W':
+            if parameter_type == 'alpha':
                 self.alpha_DK_W = value
-            elif parameter_name == 'beta_DK_W':
-                self.beta_DK_W = value
-            elif parameter_name == 'alpha_CN_T':
                 self.alpha_CN_T = value
-            elif parameter_name == 'beta_CN_T':
+            elif parameter_type == 'beta':
+                self.beta_DK_W = value
                 self.beta_CN_T = value
             
-            if result_type == 'utility':
-                _, U_DK, U_CN = self.before_trade()
-                results.append((U_DK, U_CN))
-            elif result_type == 'production':
-                allocations, _, _ = self.run_optimization()
-                prod_DK_W = allocations['DK']['Production_Windmills']
-                prod_DK_T = allocations['DK']['Production_Textiles']
-                prod_CN_W = allocations['CN']['Production_Windmills']
-                prod_CN_T = allocations['CN']['Production_Textiles']
-                results.append((prod_DK_W + prod_CN_W, prod_DK_T + prod_CN_T))
+            _, U_DK, U_CN = self.before_trade()
+            results_DK.append(U_DK)
+            results_CN.append(U_CN)
         
-        results = np.array(results)
-        plt.plot(parameter_values, results[:, 0], label='Denmark')
-        plt.plot(parameter_values, results[:, 1], label='China')
-        plt.xlabel(parameter_name)
-        if result_type == 'utility':
-            plt.ylabel('Utility')
-        elif result_type == 'production':
-            plt.ylabel('Production')
-        plt.title(f'{result_type.capitalize()} as a result of change in {parameter_name}')
+        plt.figure(figsize=(8, 6))
+        plt.plot(parameter_values, results_DK, label=f'Denmark {parameter_type}')
+        plt.plot(parameter_values, results_CN, label=f'China {parameter_type}')
+        plt.xlabel(f'{parameter_type} values')
+        plt.ylabel('Utility' if result_type == 'utility' else 'Production')
+        plt.title(f'Effect of {parameter_type} on {result_type.capitalize()}')
         plt.legend()
+        plt.grid(True)
         plt.show()
 
     def plot_rho_effect_utility(self, rho_values):
@@ -235,19 +226,16 @@ class HOmodelClass:
         plt.show()
 
 
-
-# ############################################################################################################### #
-# ##################################### EXTENSION: CES PRODUCTION FUNCTION ###################################### #
-# ############################################################################################################### #
-# From here we do the extension by using another production function: A Constant Elasticity of Substitution (CES) production function.
+    # ############################################################################################################### #
+    # ##################################### EXTENSION: CES PRODUCTION FUNCTION ###################################### #
+    # ############################################################################################################### #
+    # From here we do the extension by using another production function: A Constant Elasticity of Substitution (CES) production function.
     def production_ces(self, K, L, alpha, rho):
         # This assumes alpha is the capital share and (1-alpha) is the labor share
         return (alpha * K**rho + (1 - alpha) * L**rho)**(1/rho)
-        #return (alpha * K**0.3 + (1 - alpha) * L**0.3)**(1/0.3)
     
     def utility_ces(self, C1, C2, rho): 
         return (C1**rho + C2**rho)**(1/rho) # Utility function for a CES
-        #return (C1**0.3 + C2**0.3)**(1/0.3) # Utility function for a CES
 
     def constraints_ces(self): # Constraints for optimization
         return [
@@ -354,6 +342,31 @@ class HOmodelClass:
             plt.tight_layout()
             plt.show()
     
+    def plot_parameter_effect_combined_ces(self, parameter_values, parameter_type, result_type='utility'):
+        results_DK = []
+        results_CN = []
+        for value in parameter_values:
+            if parameter_type == 'alpha':
+                self.alpha_DK_W = value
+                self.alpha_CN_T = value
+            elif parameter_type == 'beta':
+                self.beta_DK_W = value
+                self.beta_CN_T = value
+            
+            _, U_DK, U_CN = self.before_trade_ces()
+            results_DK.append(U_DK)
+            results_CN.append(U_CN)
+        
+        plt.figure(figsize=(8, 6))
+        plt.plot(parameter_values, results_DK, label=f'Denmark {parameter_type}')
+        plt.plot(parameter_values, results_CN, label=f'China {parameter_type}')
+        plt.xlabel(f'{parameter_type} values')
+        plt.ylabel('Utility' if result_type == 'utility' else 'Production')
+        plt.title(f'Effect of {parameter_type} on {result_type.capitalize()}')
+        plt.legend()
+        plt.grid(True)
+        plt.show()
+
     def plot_parameter_effect_ces(self, parameter_values, parameter_name, result_type='utility'):
         results = []
         for value in parameter_values:
