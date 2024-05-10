@@ -261,12 +261,9 @@ class HOmodelClass:
 
 
 
-#
-#
-#
-#
-#
-#
+# ############################################################################################################### #
+# ##################################### EXTENSION: CES PRODUCTION FUNCTION ###################################### #
+# ############################################################################################################### #
 # From here we do the extension by using another production function: A Constant Elasticity of Substitution (CES) production function.
     def production_ces(self, K, L, alpha, rho):
         # This assumes alpha is the capital share and (1-alpha) is the labor share
