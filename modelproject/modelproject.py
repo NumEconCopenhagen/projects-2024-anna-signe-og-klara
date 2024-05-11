@@ -38,7 +38,7 @@ class HOmodelClass:
         U_CN = self.utility(prod_CN_T + prod_CN_W, prod_DK_T + prod_DK_W, self.rho) # Utility for China
         return -(U_DK + U_CN) # Objective is to maximize total utility
 
-    def run_optimization(self): # Run optimization
+    def run_optimization(self): # Run optimization for when trade occurs
         initial_guess = [self.K_DK/2, self.L_DK/2, self.K_DK/2, self.L_DK/2, self.K_CN/2, self.L_CN/2, self.K_CN/2, self.L_CN/2] # Initial guess
         result = minimize(self.objective, initial_guess, constraints=self.constraints(), method='SLSQP') # Optimization
         if result.success: # If optimization is successful
@@ -55,16 +55,24 @@ class HOmodelClass:
                 'CN': {'K_Windmills': x[4], 'L_Windmills': x[5], 'K_Textiles': x[6], 'L_Textiles': x[7],
                     'Production_Windmills': prod_CN_W, 'Production_Textiles': prod_CN_T}
             }
+            # Returning utility for each country
             U_DK, U_CN = self.separate_utilities(x)
             return allocations, U_DK, U_CN
         else:
             raise Exception("Optimization failed: " + result.message)
+    
 
-    def before_trade_old(self):
+    # Function to calculate the results before trade (basecase). Note: there is no optimization in this step - both countries use all their ressources on production of one good only.
+    def before_trade(self):
+        # Calculate production quantities
         prod_DK_W = self.production(self.K_DK, self.L_DK, self.alpha_DK_W, self.beta_DK_W)
         prod_CN_T = self.production(self.K_CN, self.L_CN, self.alpha_CN_T, self.beta_CN_T)
-        U_DK = self.utility(prod_DK_W, 0, self.rho)  # Assuming only Windmills contribute to utility in Denmark
-        U_CN = self.utility(0, prod_CN_T, self.rho)  # Assuming only Textiles contribute to utility in China
+        
+        # Calculate utility for Denmark
+        U_DK = self.utility(prod_DK_W, 0, self.rho) # Assuming only Windmills contribute to utility in Denmark
+        
+        # Calculate utility for China
+        U_CN = self.utility(0, prod_CN_T, self.rho) # Assuming only Textiles contribute to utility in China
 
         return {
             'DK': {'K_Windmills': self.K_DK, 'L_Windmills': self.L_DK, 'K_Textiles': 0, 'L_Textiles': 0,
@@ -74,28 +82,7 @@ class HOmodelClass:
         }, U_DK, U_CN
     
 
-    # ÆNDRET HER --> for at få parameterværdier til at ændre!!!!
-    def before_trade(self):
-        # Calculate production quantities
-        prod_DK_W = self.production(self.K_DK, self.L_DK, self.alpha_DK_W, self.beta_DK_W)
-        prod_CN_T = self.production(self.K_CN, self.L_CN, self.alpha_CN_T, self.beta_CN_T)
-        
-        # Calculate utility for Denmark
-        U_DK = self.utility(prod_DK_W, 0, self.rho)
-        
-        # Calculate utility for China
-        U_CN = self.utility(0, prod_CN_T, self.rho)
-
-        return {
-            'DK': {'K_Windmills': self.K_DK, 'L_Windmills': self.L_DK, 'K_Textiles': 0, 'L_Textiles': 0,
-                'Production_Windmills': prod_DK_W, 'Production_Textiles': 0},
-            'CN': {'K_Windmills': 0, 'L_Windmills': 0, 'K_Textiles': self.K_CN, 'L_Textiles': self.L_CN,
-                'Production_Windmills': 0, 'Production_Textiles': prod_CN_T}
-        }, U_DK, U_CN
-    # !!!!!!!!!!!!!!!
-
-
-    def separate_utilities(self, x):
+    def separate_utilities(self, x): # Computing the utilities based on the optimized allocation
         # Re-calculate production based on optimized values
         prod_DK_W = self.production(x[0], x[1], self.alpha_DK_W, self.beta_DK_W)
         prod_DK_T = self.production(x[2], x[3], self.alpha_CN_T, self.beta_CN_T)
@@ -106,7 +93,7 @@ class HOmodelClass:
         U_CN = self.utility(prod_CN_T + prod_CN_W, prod_DK_T + prod_DK_W, self.rho) # Utility for China
         return U_DK, U_CN
     
-    def plot_trade_results(self):
+    def plot_trade_results(self): 
         # Get the results before trade
         before_trade_results, U_DK_before, U_CN_before = self.before_trade()
 
@@ -117,7 +104,7 @@ class HOmodelClass:
             print(e)
             allocations = None
 
-        if allocations:
+        if allocations: 
             # Data Preparation
             labels = ['Denmark', 'China']
             utility = [U_DK_before, U_DK, U_CN_before, U_CN]
@@ -141,22 +128,22 @@ class HOmodelClass:
             plt.tight_layout()
             plt.show()
     
-
-    def plot_parameter_effect_combined(self, parameter_values, parameter_type, result_type='utility'):
-        results_DK = []
-        results_CN = []
+    # Function to plot the effect of changes in alpha and beta
+    def plot_parameter_effect_combined(self, parameter_values, parameter_type, result_type='utility'): 
+        results_DK = [] # List to store the results for Denmark
+        results_CN = [] # List to store the results for China
         for value in parameter_values:
-            if parameter_type == 'alpha':
-                self.alpha_DK_W = value
+            if parameter_type == 'alpha': # Changing alphas (in the assigned range)
+                self.alpha_DK_W = value 
                 self.alpha_CN_T = value
-            elif parameter_type == 'beta':
+            elif parameter_type == 'beta': # Changing betas (in the assigned range)
                 self.beta_DK_W = value
                 self.beta_CN_T = value
-            
+            # Checking the results for each parameter value in the range
             _, U_DK, U_CN = self.before_trade()
             results_DK.append(U_DK)
             results_CN.append(U_CN)
-        
+        # Plotting the results
         plt.figure(figsize=(8, 6))
         plt.plot(parameter_values, results_DK, label=f'Denmark {parameter_type}')
         plt.plot(parameter_values, results_CN, label=f'China {parameter_type}')
@@ -166,17 +153,17 @@ class HOmodelClass:
         plt.legend()
         plt.grid(True)
         plt.show()
-
+    # Function to plot the effect of changes in rho
     def plot_rho_effect_utility(self, rho_values):
         results_DK = []
         results_CN = []
 
-        for rho in rho_values:
+        for rho in rho_values: # Checking the results for each rho value in the range
             self.rho = rho
             _, U_DK, U_CN = self.before_trade()
             results_DK.append(U_DK)
             results_CN.append(U_CN)
-
+        # Plotting the results
         plt.plot(rho_values, results_DK, label='Denmark')
         plt.plot(rho_values, results_CN, label='China')
         plt.xlabel('rho')
@@ -192,9 +179,9 @@ class HOmodelClass:
 
         # Varying capital allocation to windmills from 0 to K_total
         for K_windmills in np.linspace(0, K_total, 100):
-            K_textiles = K_total - K_windmills
+            K_textiles = K_total - K_windmills # Remaining capital allocated to textiles
             L_windmills = L_total * (K_windmills / K_total)  # Assuming proportional allocation of labor
-            L_textiles = L_total - L_windmills
+            L_textiles = L_total - L_windmills # Remaining labor allocated to textiles
 
             # Calculate production of windmills and textiles
             prod_windmills = self.production(K_windmills, L_windmills, alpha_W, beta_W)
@@ -204,7 +191,7 @@ class HOmodelClass:
             textile_production.append(prod_textiles)
 
         return windmill_production, textile_production
-
+    # Plotting the PPF's for the two countries
     def plot_ppf(self):
         # Generate PPF data for Denmark
         windmill_prod_DK, textile_prod_DK = self.generate_ppf_data(
@@ -245,7 +232,7 @@ class HOmodelClass:
             {'type': 'ineq', 'fun': lambda x: self.L_CN - x[5] - x[7]}, # Labor constraint for China
             {'type': 'ineq', 'fun': lambda x: x}  # Non-negativity
         ]
-
+    # Defining the objective of the optimization problem (same as before)
     def objective_ces(self, x):
         # Update the objective to account for production of both goods in both countries
         prod_DK_W = self.production_ces(x[0], x[1], self.alpha_DK_W, self.beta_DK_W) # Production of Windmills in Denmark
@@ -273,21 +260,22 @@ class HOmodelClass:
                 'CN': {'K_Windmills': x[4], 'L_Windmills': x[5], 'K_Textiles': x[6], 'L_Textiles': x[7],
                     'Production_Windmills': prod_CN_W, 'Production_Textiles': prod_CN_T}
             }
+            # Returning utility for each country
             U_DK, U_CN = self.separate_utilities_ces(x)
             return allocations, U_DK, U_CN
         else:
             raise Exception("Optimization failed: " + result.message)
 
-    def before_trade_ces(self):
+    def before_trade_ces(self): # The basecase before trade with CES production function
         # Calculate production quantities
         prod_DK_W = self.production_ces(self.K_DK, self.L_DK, self.alpha_DK_W, self.beta_DK_W)
         prod_CN_T = self.production_ces(self.K_CN, self.L_CN, self.alpha_CN_T, self.beta_CN_T)
         
         # Calculate utility for Denmark
-        U_DK = self.utility(prod_DK_W, 0, self.rho)
+        U_DK = self.utility(prod_DK_W, 0, self.rho) # Still assuming that only Windmills contribute to utility in Denmark
         
         # Calculate utility for China
-        U_CN = self.utility(0, prod_CN_T, self.rho)
+        U_CN = self.utility(0, prod_CN_T, self.rho) # Still assuming that only Textiles contribute to utility in China
 
         return {
             'DK': {'K_Windmills': self.K_DK, 'L_Windmills': self.L_DK, 'K_Textiles': 0, 'L_Textiles': 0,
@@ -295,7 +283,7 @@ class HOmodelClass:
             'CN': {'K_Windmills': 0, 'L_Windmills': 0, 'K_Textiles': self.K_CN, 'L_Textiles': self.L_CN,
                 'Production_Windmills': 0, 'Production_Textiles': prod_CN_T}
         }, U_DK, U_CN
-
+    # Calculating the utilities based on the optimized allocation
     def separate_utilities_ces(self, x):
         # Re-calculate production based on optimized values
         prod_DK_W = self.production_ces(x[0], x[1], self.alpha_DK_W, self.beta_DK_W)
@@ -306,7 +294,7 @@ class HOmodelClass:
         U_DK = self.utility_ces(prod_DK_W + prod_CN_W, prod_DK_T + prod_CN_T, self.rho) # Utility for Denmark
         U_CN = self.utility_ces(prod_CN_T + prod_CN_W, prod_DK_T + prod_DK_W, self.rho) # Utility for China
         return U_DK, U_CN
-    
+    # Plotting the results of basecase without trade and with trade (using the CES production function)
     def plot_trade_results_ces(self):
         # Get the results before trade
         before_trade_results, U_DK_before, U_CN_before = self.before_trade_ces()
@@ -342,21 +330,22 @@ class HOmodelClass:
             plt.tight_layout()
             plt.show()
     
+    # Function to plot the effect of changes in alpha and beta (using the CES production function)
     def plot_parameter_effect_combined_ces(self, parameter_values, parameter_type, result_type='utility'):
         results_DK = []
         results_CN = []
         for value in parameter_values:
-            if parameter_type == 'alpha':
+            if parameter_type == 'alpha': # Changing alphas (in the assigned range)
                 self.alpha_DK_W = value
                 self.alpha_CN_T = value
-            elif parameter_type == 'beta':
+            elif parameter_type == 'beta': # Changing betas (in the assigned range)
                 self.beta_DK_W = value
                 self.beta_CN_T = value
             
             _, U_DK, U_CN = self.before_trade_ces()
             results_DK.append(U_DK)
             results_CN.append(U_CN)
-        
+        # Plotting the results
         plt.figure(figsize=(8, 6))
         plt.plot(parameter_values, results_DK, label=f'Denmark {parameter_type}')
         plt.plot(parameter_values, results_CN, label=f'China {parameter_type}')
@@ -420,15 +409,16 @@ class HOmodelClass:
         plt.legend()
         plt.show()
 
+    # Generating the allocations for the two countries to plot ppf's 
     def generate_ppf_data_ces(self, K_total, L_total, alpha_W, alpha_T, rho):
         windmill_production = []
         textile_production = []
 
         # Varying capital allocation to windmills from 0 to K_total
-        for K_windmills in np.linspace(0, K_total, 100):
-            K_textiles = K_total - K_windmills
+        for K_windmills in np.linspace(0, K_total, 100): 
+            K_textiles = K_total - K_windmills # Remaining capital allocated to textiles
             L_windmills = L_total * (K_windmills / K_total)  # Assuming proportional allocation of labor
-            L_textiles = L_total - L_windmills
+            L_textiles = L_total - L_windmills # Remaining labor allocated to textiles
 
             # Calculate production of windmills and textiles
             prod_windmills = self.production_ces(K_windmills, L_windmills, alpha_W, rho)
@@ -439,6 +429,7 @@ class HOmodelClass:
 
         return windmill_production, textile_production
 
+    # Plotting the PPF's for the two countries using the CES production function
     def plot_ppf_ces(self):
         # Generate PPF data for Denmark
         windmill_prod_DK, textile_prod_DK = self.generate_ppf_data_ces(
