@@ -360,9 +360,9 @@ class HOmodelClass:
         results_DK = []
         results_CN = []
 
-        for rho in rho_values:
+        for rho in rho_values: # Checking the results for each rho value in the assigned range
             self.rho = rho
-            _, U_DK, U_CN = self.before_trade_ces()
+            _, U_DK, U_CN = self.before_trade_ces() # Calculating the utilities for each rho
             results_DK.append(U_DK)
             results_CN.append(U_CN)
 
