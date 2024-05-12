@@ -12,6 +12,8 @@ class HOmodelClass:
         self.K_DK, self.L_DK = 100, 50  # Denmark's capital and labor
         self.K_CN, self.L_CN = 50, 100  # China's capital and labor
         self.rho = 0.5  # Elasticity of substitution in utility
+        self.rho_DK_W = 0.5  # Elasticity of substitution in Denmark for Windmills
+        self.rho_CN_T = 0.5  # Elasticity of substitution in China for Textiles
 
     def production(self, K, L, alpha, beta): # Production function
         return K**alpha * L**beta # Cobb-Douglas production function
@@ -232,13 +234,13 @@ class HOmodelClass:
             {'type': 'ineq', 'fun': lambda x: self.L_CN - x[5] - x[7]}, # Labor constraint for China
             {'type': 'ineq', 'fun': lambda x: x}  # Non-negativity
         ]
-    # Defining the objective of the optimization problem (same as before)
+    # Defining the objective of the optimization problem
     def objective_ces(self, x):
         # Update the objective to account for production of both goods in both countries
-        prod_DK_W = self.production_ces(x[0], x[1], self.alpha_DK_W, self.beta_DK_W) # Production of Windmills in Denmark
-        prod_DK_T = self.production_ces(x[2], x[3], self.alpha_CN_T, self.beta_CN_T) # Production of Textiles in Denmark
-        prod_CN_W = self.production_ces(x[4], x[5], self.alpha_DK_W, self.beta_DK_W) # Production of Windmills in China
-        prod_CN_T = self.production_ces(x[6], x[7], self.alpha_CN_T, self.beta_CN_T) # Production of Textiles in China
+        prod_DK_W = self.production_ces(x[0], x[1], self.alpha_DK_W, self.rho_DK_W) # Production of Windmills in Denmark
+        prod_DK_T = self.production_ces(x[2], x[3], self.alpha_CN_T, self.rho_CN_T) # Production of Textiles in Denmark
+        prod_CN_W = self.production_ces(x[4], x[5], self.alpha_DK_W, self.rho_DK_W) # Production of Windmills in China
+        prod_CN_T = self.production_ces(x[6], x[7], self.alpha_CN_T, self.rho_CN_T) # Production of Textiles in China
         U_DK = self.utility_ces(prod_DK_W + prod_CN_W, prod_DK_T + prod_CN_T, self.rho) # Utility for Denmark
         U_CN = self.utility_ces(prod_CN_T + prod_CN_W, prod_DK_T + prod_DK_W, self.rho) # Utility for China
         return -(U_DK + U_CN) # Objective is to maximize total utility
@@ -249,10 +251,10 @@ class HOmodelClass:
         if result.success: # If optimization is successful
             x = result.x
             # Calculate production based on optimized resource allocations
-            prod_DK_W = self.production_ces(x[0], x[1], self.alpha_DK_W, self.beta_DK_W)
-            prod_DK_T = self.production_ces(x[2], x[3], self.alpha_CN_T, self.beta_CN_T)
-            prod_CN_W = self.production_ces(x[4], x[5], self.alpha_DK_W, self.beta_DK_W)
-            prod_CN_T = self.production_ces(x[6], x[7], self.alpha_CN_T, self.beta_CN_T)
+            prod_DK_W = self.production_ces(x[0], x[1], self.alpha_DK_W, self.rho_DK_W)
+            prod_DK_T = self.production_ces(x[2], x[3], self.alpha_CN_T, self.rho_CN_T)
+            prod_CN_W = self.production_ces(x[4], x[5], self.alpha_DK_W, self.rho_DK_W)
+            prod_CN_T = self.production_ces(x[6], x[7], self.alpha_CN_T, self.rho_CN_T)
             
             allocations = { # Resource allocations and production in each country
                 'DK': {'K_Windmills': x[0], 'L_Windmills': x[1], 'K_Textiles': x[2], 'L_Textiles': x[3],
@@ -268,8 +270,8 @@ class HOmodelClass:
 
     def before_trade_ces(self): # The basecase before trade with CES production function
         # Calculate production quantities
-        prod_DK_W = self.production_ces(self.K_DK, self.L_DK, self.alpha_DK_W, self.beta_DK_W)
-        prod_CN_T = self.production_ces(self.K_CN, self.L_CN, self.alpha_CN_T, self.beta_CN_T)
+        prod_DK_W = self.production_ces(self.K_DK, self.L_DK, self.alpha_DK_W, self.rho_DK_W)
+        prod_CN_T = self.production_ces(self.K_CN, self.L_CN, self.alpha_CN_T, self.rho_CN_T)
         
         # Calculate utility for Denmark
         U_DK = self.utility(prod_DK_W, 0, self.rho) # Still assuming that only Windmills contribute to utility in Denmark
@@ -286,10 +288,10 @@ class HOmodelClass:
     # Calculating the utilities based on the optimized allocation
     def separate_utilities_ces(self, x):
         # Re-calculate production based on optimized values
-        prod_DK_W = self.production_ces(x[0], x[1], self.alpha_DK_W, self.beta_DK_W)
-        prod_DK_T = self.production_ces(x[2], x[3], self.alpha_CN_T, self.beta_CN_T)
-        prod_CN_W = self.production_ces(x[4], x[5], self.alpha_DK_W, self.beta_DK_W)
-        prod_CN_T = self.production_ces(x[6], x[7], self.alpha_CN_T, self.beta_CN_T)
+        prod_DK_W = self.production_ces(x[0], x[1], self.alpha_DK_W, self.rho_DK_W)
+        prod_DK_T = self.production_ces(x[2], x[3], self.alpha_CN_T, self.rho_CN_T)
+        prod_CN_W = self.production_ces(x[4], x[5], self.alpha_DK_W, self.rho_DK_W) 
+        prod_CN_T = self.production_ces(x[6], x[7], self.alpha_CN_T, self.rho_CN_T)
         # Calculate utility for each country
         U_DK = self.utility_ces(prod_DK_W + prod_CN_W, prod_DK_T + prod_CN_T, self.rho) # Utility for Denmark
         U_CN = self.utility_ces(prod_CN_T + prod_CN_W, prod_DK_T + prod_DK_W, self.rho) # Utility for China
@@ -330,7 +332,7 @@ class HOmodelClass:
             plt.tight_layout()
             plt.show()
     
-    # Function to plot the effect of changes in alpha and beta (using the CES production function)
+    # Function to plot the effect of changes in alpha (using the CES production function)
     def plot_parameter_effect_combined_ces(self, parameter_values, parameter_type, result_type='utility'):
         results_DK = []
         results_CN = []
@@ -338,10 +340,7 @@ class HOmodelClass:
             if parameter_type == 'alpha': # Changing alphas (in the assigned range)
                 self.alpha_DK_W = value
                 self.alpha_CN_T = value
-            elif parameter_type == 'beta': # Changing betas (in the assigned range)
-                self.beta_DK_W = value
-                self.beta_CN_T = value
-            
+            # Calculating utilities
             _, U_DK, U_CN = self.before_trade_ces()
             results_DK.append(U_DK)
             results_CN.append(U_CN)
@@ -356,41 +355,7 @@ class HOmodelClass:
         plt.grid(True)
         plt.show()
 
-    def plot_parameter_effect_ces(self, parameter_values, parameter_name, result_type='utility'):
-        results = []
-        for value in parameter_values:
-            if parameter_name == 'alpha_DK_W':
-                self.alpha_DK_W = value
-            elif parameter_name == 'beta_DK_W':
-                self.beta_DK_W = value
-            elif parameter_name == 'alpha_CN_T':
-                self.alpha_CN_T = value
-            elif parameter_name == 'beta_CN_T':
-                self.beta_CN_T = value
-            
-            if result_type == 'utility':
-                _, U_DK, U_CN = self.before_trade_ces()
-                results.append((U_DK, U_CN))
-            elif result_type == 'production':
-                allocations, _, _ = self.run_optimization_ces()
-                prod_DK_W = allocations['DK']['Production_Windmills']
-                prod_DK_T = allocations['DK']['Production_Textiles']
-                prod_CN_W = allocations['CN']['Production_Windmills']
-                prod_CN_T = allocations['CN']['Production_Textiles']
-                results.append((prod_DK_W + prod_CN_W, prod_DK_T + prod_CN_T))
-        
-        results = np.array(results)
-        plt.plot(parameter_values, results[:, 0], label='Denmark')
-        plt.plot(parameter_values, results[:, 1], label='China')
-        plt.xlabel(parameter_name)
-        if result_type == 'utility':
-            plt.ylabel('Utility')
-        elif result_type == 'production':
-            plt.ylabel('Production')
-        plt.title(f'{result_type.capitalize()} as a result of change in {parameter_name}')
-        plt.legend()
-        plt.show()
-
+    # Plotting the effect of changes in rho (using the CES production function)
     def plot_rho_effect_utility_ces(self, rho_values):
         results_DK = []
         results_CN = []
