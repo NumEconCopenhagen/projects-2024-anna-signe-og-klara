@@ -8,6 +8,7 @@ import seaborn as sns
 import ipywidgets as widgets
 from ipywidgets import interactive
 from IPython.display import display
+from IPython.display import display, Markdown
 
 
 class Dataproject_functions:
@@ -48,14 +49,16 @@ class Dataproject_functions:
     def print_summary_stats(self):
         if self.summary_stats is not None:
             print("Summary Statistics:")
-            print(self.summary_stats)
+            display(self.summary_stats)
+            #print(self.summary_stats)
         else:
             print("Summary statistics have not been computed yet.")
 
     def print_summary_stats_censorship(self):
         if self.summary_stats_censorship is not None:
             print("Summary Statistics (Censorship):")
-            print(self.summary_stats_censorship)
+            display(self.summary_stats_censorship)
+            #print(self.summary_stats_censorship)
         else:
             print("Censorship summary statistics have not been computed yet.")
 
@@ -269,13 +272,13 @@ class Dataproject_functions:
         share_movies_dk, share_movies_usa, share_movies_eu = self.compute_movie_shares()
         share_tickets_dk, share_tickets_usa, share_tickets_eu = self.compute_ticket_shares()
 
-        print(f'The share of the total number of movies for Denmark is {share_movies_dk:.2f}')
-        print(f'The share of the total number of movies for USA is {share_movies_usa:.2f}')
-        print(f'The share of the total number of movies for EU-28 excluding Denmark is {share_movies_eu:.2f}')
+        display(Markdown(f'**The share of the total number of movies for Denmark is {share_movies_dk:.2f}**'))
+        display(Markdown(f'**The share of the total number of movies for USA is {share_movies_usa:.2f}**'))
+        display(Markdown(f'**The share of the total number of movies for EU-28 excluding Denmark is {share_movies_eu:.2f}**'))
 
-        print(f'The share of the total number of tickets sold for Denmark is {share_tickets_dk:.2f}')
-        print(f'The share of the total number of tickets sold for USA is {share_tickets_usa:.2f}')
-        print(f'The share of the total number of tickets sold for EU-28 excluding Denmark is {share_tickets_eu:.2f}')
+        display(Markdown(f'**The share of the total number of tickets sold for Denmark is {share_tickets_dk:.2f}**'))
+        display(Markdown(f'**The share of the total number of tickets sold for USA is {share_tickets_usa:.2f}**'))
+        display(Markdown(f'**The share of the total number of tickets sold for EU-28 excluding Denmark is {share_tickets_eu:.2f}**'))
     
     def plot_censorship_graph_new(self, year, selected_countries):
         # List to store the filtered dataframes for each country
