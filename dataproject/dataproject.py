@@ -282,39 +282,47 @@ class Dataproject_functions:
         filtered_data_per_country = []
         
         # Filter the data for the provided year
-        filtered_bio_cencorship_year = self.filtered_bio_cencorship[self.filtered_bio_cencorship['Year'] == int(year)]
+        filtered_bio_censorship_year = self.filtered_bio_cencorship[self.filtered_bio_cencorship['Year'] == int(year)]
 
         # Iterate over selected countries
         for country in selected_countries:
             # Filter the data for the current country and type
-            filtered_data_movies = filtered_bio_cencorship_year[(filtered_bio_cencorship_year['Country'] == country) & 
-                                                                (filtered_bio_cencorship_year['Type'] == 'Film (antal)')]
-        
-            # Calculate the total number of movies for the current country and year
-            total_movies_country = filtered_data_movies['Value'].sum()
-        
-            # Calculate the share of movies for each censorship category
-            filtered_data_movies['Share'] = filtered_data_movies['Value'] / total_movies_country * 100
-        
-            # Append the filtered dataframe to the list
-            filtered_data_per_country.append(filtered_data_movies)
+            filtered_data_movies = filtered_bio_censorship_year[(filtered_bio_censorship_year['Country'] == country) & 
+                                                                (filtered_bio_censorship_year['Type'] == 'Film (antal)')]
 
+            if not filtered_data_movies.empty:
+                # Aggregate the data by country and censorship category
+                aggregated_data = filtered_data_movies.groupby(['Country', 'Censorship']).agg({'Value': 'sum'}).reset_index()
+
+                # Calculate the total number of movies for the current country and year
+                total_movies_country = aggregated_data['Value'].sum()
+
+                if total_movies_country > 0:
+                    # Calculate the share of movies for each censorship category
+                    aggregated_data['Share'] = aggregated_data['Value'] / total_movies_country * 100
+
+                    # Append the aggregated dataframe to the list
+                    filtered_data_per_country.append(aggregated_data)
+        
         # Concatenate the filtered dataframes for all countries
-        filtered_data_all_countries = pd.concat(filtered_data_per_country)
+        if filtered_data_per_country:
+            filtered_data_all_countries = pd.concat(filtered_data_per_country)
 
-        # Create the single plot
-        plt.figure(figsize=(10, 6))
+            # Create the single plot
+            plt.figure(figsize=(10, 6))
 
-        # Create the plot
-        sns.barplot(data=filtered_data_all_countries, x='Censorship', y='Share', hue='Country')
-        plt.title(f'Share of Movies by Censorship Category for Selected Countries (Year: {year})')
-        plt.xlabel('Censorship Category')
-        plt.ylabel('Share')
-        plt.xticks(rotation=90)
+            # Create the plot
+            sns.barplot(data=filtered_data_all_countries, x='Censorship', y='Share', hue='Country')
+            plt.title(f'Share of Movies by Censorship Category for Selected Countries (Year: {year})')
+            plt.xlabel('Censorship Category')
+            plt.ylabel('Share')
+            plt.xticks(rotation=90)
 
-        # Show the plot
-        plt.tight_layout()
-        plt.show()
+            # Show the plot
+            plt.tight_layout()
+            plt.show()
+        else:
+            print("No data available for the selected countries and year.")
 
     def plot_number_of_movies(self, country):
         # Create a single plot
