@@ -22,12 +22,22 @@ class Dataproject_functions:
         self.bio = pd.read_excel(self.filename, skiprows=2)
 
     def clean_data(self):
-        self.bio['Unnamed: 1'] = self.bio['Unnamed: 1'].fillna(method='ffill')
-        self.bio['Unnamed: 2'] = self.bio['Unnamed: 2'].fillna(method='ffill')
-        self.bio['Unnamed: 3'] = self.bio['Unnamed: 3'].fillna(method='ffill')
+        # Replace deprecated fillna method with ffill
+        self.bio['Unnamed: 1'] = self.bio['Unnamed: 1'].ffill()
+        self.bio['Unnamed: 2'] = self.bio['Unnamed: 2'].ffill()
+        self.bio['Unnamed: 3'] = self.bio['Unnamed: 3'].ffill()
+        
+        # Drop the specified columns
         drop_these = ['Unnamed: 0']
         self.bio.drop(drop_these, axis=1, inplace=True)
-        self.bio.rename(columns={'Unnamed: 1':'Country', 'Unnamed: 2':'Censorship', 'Unnamed: 3':'Type', 'Unnamed: 4':'Cinema_movies'}, inplace=True)
+        
+        # Rename columns
+        self.bio.rename(columns={
+            'Unnamed: 1': 'Country', 
+            'Unnamed: 2': 'Censorship', 
+            'Unnamed: 3': 'Type', 
+            'Unnamed: 4': 'Cinema_movies'
+        }, inplace=True)
 
     def melt_data(self):
         self.bio_melted = self.bio.melt(id_vars=['Country', 'Censorship', 'Type', 'Cinema_movies'], var_name='Year', value_name='Value')
@@ -280,7 +290,7 @@ class Dataproject_functions:
         display(Markdown(f'**The share of the total number of tickets sold for USA is {share_tickets_usa:.2f}**'))
         display(Markdown(f'**The share of the total number of tickets sold for EU-28 excluding Denmark is {share_tickets_eu:.2f}**'))
     
-    def plot_censorship_graph_new(self, year, selected_countries):
+    def plot_censorship_graph_new(self, year, selected_countries, figure_label):
         # List to store the filtered dataframes for each country
         filtered_data_per_country = []
         
@@ -316,7 +326,7 @@ class Dataproject_functions:
 
             # Create the plot
             sns.barplot(data=filtered_data_all_countries, x='Censorship', y='Share', hue='Country')
-            plt.title(f'Share of Movies by Censorship Category for Selected Countries (Year: {year})')
+            plt.title(f'{figure_label}: Share of Movies by Censorship Category for Selected Countries (Year: {year})')
             plt.xlabel('Censorship Category')
             plt.ylabel('Share')
             plt.xticks(rotation=90)
@@ -327,7 +337,7 @@ class Dataproject_functions:
         else:
             print("No data available for the selected countries and year.")
 
-    def plot_number_of_movies(self, country):
+    def plot_number_of_movies(self, country, figure_label):
         # Create a single plot
         fig, ax = plt.subplots(figsize=(10, 6))
 
@@ -340,7 +350,7 @@ class Dataproject_functions:
         # Set labels and title
         ax.set_xlabel('Year')
         ax.set_ylabel('Number of movies')
-        ax.set_title(f'Number of movies by country: {country}')
+        ax.set_title(f'{figure_label}: Number of movies by country: {country}')
 
         # Add legend
         ax.legend()
@@ -349,7 +359,7 @@ class Dataproject_functions:
         plt.show()
 
     # Define the method plot_number_of_movies_interactive
-    def plot_number_of_movies_interactive(self, selected_countries):
+    def plot_number_of_movies_interactive(self, selected_countries, figure_label):
         # Create a dropdown widget for the selected country
         country_widget = widgets.Dropdown(
             options=selected_countries,
@@ -358,7 +368,10 @@ class Dataproject_functions:
         )
 
         # Create an interactive plot
-        interactive_plot = widgets.interactive(self.plot_number_of_movies, country=country_widget)
+        interactive_plot = widgets.interactive(self.plot_number_of_movies, country=country_widget, figure_label=widgets.fixed(figure_label))
         
         # Display the interactive plot
         display(interactive_plot)
+
+        
+
