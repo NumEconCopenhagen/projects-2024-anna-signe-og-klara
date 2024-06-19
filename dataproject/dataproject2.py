@@ -50,6 +50,39 @@ class Dataproject_functions:
         # Filter the data to include only years from 2015 onwards (we do not have enough data from before 2015)
         self.bio_melted = self.bio_melted[self.bio_melted['Year'] >= 2015]
 
+    # Changing the values of country, censorship, type and cinema_movies from danish to english
+    def change_language(self):
+        # Change the values of 'Country' from Danish to English
+        self.bio_melted['Country'] = self.bio_melted['Country'].replace({
+            'Danmark': 'Denmark',
+            'EU-28 udenfor Danmark': 'EU-28 excluding Denmark'
+        })
+        # Change the values of 'Censorship' from Danish to English
+        self.bio_melted['Censorship'] = self.bio_melted['Censorship'].replace({
+            'Alle censurforhold': 'All censorship conditions',
+            'Tilladt for alle': 'Allowed for all',
+            'Frarådet  for børn under 7 år': 'Discouraged for children under 7 years',
+            'Tilladt for børn over 11 år': 'Allowed for children over 11 years',
+            'Tilladt for børn over 15 år': 'Allowed for children over 15 years',
+            'Over 15 år, ikke censureret': 'Over 15 years, not censored',
+        })
+        # Change the values of 'Type' from Danish to English
+        self.bio_melted['Type'] = self.bio_melted['Type'].replace({
+            'Solgte billetter (1.000)': 'Tickets sold (thousands)',
+            'Film (antal)': 'Movies (number)'
+        })
+        # Change the values of 'Cinema_movies' from Danish to English
+        self.bio_melted['Cinema_movies'] = self.bio_melted['Cinema_movies'].replace({
+            'Spillefilm og dokumentarfilm, alle målgrupper': 'Feature films and documentaries, all target groups',
+            'Spillefilm, alle målgrupper': 'Feature films, all target groups',
+            'Spillefilm. voksne': 'Feature films, adults',
+            'Spillefilm, børn/unge/familie': 'Feature films, children/young/family',
+            'Dokumentarfilm, alle målgrupper': 'Documentary films, all target groups',
+            'Dokumentarfilm voksne': 'Documentary films, adults',
+            'Dokumentarfilm, børn/unge/familie': 'Documentary films, children/young/family',
+            'Uoplyst': 'Not specified'
+        })
+
     def filter_data(self, selected_countries, selected_censorship, selected_type, selected_cinema_movies):
         # Filter the melted data based on the selected criteria to compute the tickets sold and number of movies 
         self.filtered_bio = self.bio_melted[(self.bio_melted['Country'].isin(selected_countries)) & 
