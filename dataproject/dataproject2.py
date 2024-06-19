@@ -50,8 +50,7 @@ class Dataproject_functions:
         # Filter the data to include only years from 2015 onwards (we do not have enough data from before 2015)
         self.bio_melted = self.bio_melted[self.bio_melted['Year'] >= 2015]
 
-    # Changing the values of country, censorship, type and cinema_movies from danish to english
-    def change_language(self):
+    # Change the language of the data to English
         # Change the values of 'Country' from Danish to English
         self.bio_melted['Country'] = self.bio_melted['Country'].replace({
             'Danmark': 'Denmark',
