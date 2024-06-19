@@ -13,25 +13,27 @@ from IPython.display import display, Markdown
 
 class Dataproject_functions:
     def __init__(self, filename):
+        # Initialize the class with the provided filename and set initial variables to None
         self.filename = filename
         self.bio = None
         self.bio_cleaned = None
         self.bio_melted = None
 
     def load_data(self):
+        # Load the Excel file with data, skipping the first two rows because they are not used
         self.bio = pd.read_excel(self.filename, skiprows=2)
 
     def clean_data(self):
-        # Replace deprecated fillna method with ffill
+        # Forward-fill missing values in the specified columns, due to the fact that these are titles for the data
         self.bio['Unnamed: 1'] = self.bio['Unnamed: 1'].ffill()
         self.bio['Unnamed: 2'] = self.bio['Unnamed: 2'].ffill()
         self.bio['Unnamed: 3'] = self.bio['Unnamed: 3'].ffill()
         
-        # Drop the specified columns
+        # Drop the 'Unnamed: 0' column, because it is not used
         drop_these = ['Unnamed: 0']
         self.bio.drop(drop_these, axis=1, inplace=True)
         
-        # Rename columns
+        # Rename columns to more meaningful names
         self.bio.rename(columns={
             'Unnamed: 1': 'Country', 
             'Unnamed: 2': 'Censorship', 
@@ -40,35 +42,42 @@ class Dataproject_functions:
         }, inplace=True)
 
     def melt_data(self):
-        self.bio_melted = self.bio.melt(id_vars=['Country', 'Censorship', 'Type', 'Cinema_movies'], var_name='Year', value_name='Value')
+        # Reshape the DataFrame from wide format to long format, such that it is easier to work with
+        self.bio_melted = self.bio.melt(id_vars=['Country', 'Censorship', 'Type', 'Cinema_movies'], 
+                                        var_name='Year', value_name='Value')
+        # Remove 'bio' from the 'Year' column and convert it to integer
         self.bio_melted['Year'] = self.bio_melted['Year'].str.replace('bio', '').astype(int)
+        # Filter the data to include only years from 2015 onwards (we do not have enough data from before 2015)
         self.bio_melted = self.bio_melted[self.bio_melted['Year'] >= 2015]
 
     def filter_data(self, selected_countries, selected_censorship, selected_type, selected_cinema_movies):
+        # Filter the melted data based on the selected criteria to compute the tickets sold and number of movies 
         self.filtered_bio = self.bio_melted[(self.bio_melted['Country'].isin(selected_countries)) & 
                                              (self.bio_melted['Censorship'] == selected_censorship) & 
                                              (self.bio_melted['Type'].isin(selected_type)) &
                                              (self.bio_melted['Cinema_movies'] == selected_cinema_movies)]
 
     def group_data(self):
+        # Group the filtered data by 'Country' and 'Type', and compute summary statistics
         self.summary_stats = self.filtered_bio.groupby(['Country','Type'])['Value'].describe()
 
     def compute_summary_stats_censorship(self):
+        # Group the filtered data by 'Country' and 'Censorship', and compute summary statistics
         self.summary_stats_censorship = self.filtered_bio_cencorship.groupby(['Country', 'Censorship'])['Value'].describe()
 
     def print_summary_stats(self):
+        # Print the summary statistics if they have been computed, otherwise print a message
         if self.summary_stats is not None:
             print("Summary Statistics:")
             display(self.summary_stats)
-            #print(self.summary_stats)
         else:
             print("Summary statistics have not been computed yet.")
 
     def print_summary_stats_censorship(self):
+        # Print the censorship summary statistics if they have been computed, otherwise print a message
         if self.summary_stats_censorship is not None:
             print("Summary Statistics (Censorship):")
             display(self.summary_stats_censorship)
-            #print(self.summary_stats_censorship)
         else:
             print("Censorship summary statistics have not been computed yet.")
 
@@ -137,10 +146,15 @@ class Dataproject_functions:
         plt.show()
 
     def filter_and_group_data_censorship(self, selected_countries, selected_censorship_censorship, selected_type_censorship):
-        self.filtered_bio_cencorship = self.bio_melted[(self.bio_melted['Country'].isin(selected_countries)) & 
-                                                        (self.bio_melted['Censorship'].isin(selected_censorship_censorship)) &
-                                                        (self.bio_melted['Type'].isin(selected_type_censorship))]
+        # Filter the melted data to look at the censorship category
+        self.filtered_bio_cencorship = self.bio_melted[
+            (self.bio_melted['Country'].isin(selected_countries)) &  # Filter rows where 'Country' is in selected_countries
+            (self.bio_melted['Censorship'].isin(selected_censorship_censorship)) &  # Filter rows where 'Censorship' is in selected_censorship_censorship
+            (self.bio_melted['Type'].isin(selected_type_censorship))  # Filter rows where 'Type' is in selected_type_censorship
+        ]
+        # Group the filtered data by 'Country' and 'Censorship', and compute summary statistics for the 'Value' column
         self.summary_stats_censorship = self.filtered_bio_cencorship.groupby(['Country', 'Censorship'])['Value'].describe()
+        # The describe() method calculates summary statistics like count, mean, std, min, 25%, 50%, 75%, and max
 
     def plot_censorship_graph(self, filtered_bio_cencorship):
         # Create a figure with two subplots
@@ -279,17 +293,20 @@ class Dataproject_functions:
         return share_tickets_dk, share_tickets_usa, share_tickets_eu
 
     def print_shares(self):
+        # Compute shares of movies and tickets for Denmark, USA, and EU-28 excluding Denmark
         share_movies_dk, share_movies_usa, share_movies_eu = self.compute_movie_shares()
         share_tickets_dk, share_tickets_usa, share_tickets_eu = self.compute_ticket_shares()
 
+        # Display shares of movies for Denmark, USA, and EU-28 excluding Denmark
         display(Markdown(f'**The share of the total number of movies for Denmark is {share_movies_dk:.2f}**'))
         display(Markdown(f'**The share of the total number of movies for USA is {share_movies_usa:.2f}**'))
         display(Markdown(f'**The share of the total number of movies for EU-28 excluding Denmark is {share_movies_eu:.2f}**'))
 
+        # Display shares of tickets sold for Denmark, USA, and EU-28 excluding Denmark
         display(Markdown(f'**The share of the total number of tickets sold for Denmark is {share_tickets_dk:.2f}**'))
         display(Markdown(f'**The share of the total number of tickets sold for USA is {share_tickets_usa:.2f}**'))
         display(Markdown(f'**The share of the total number of tickets sold for EU-28 excluding Denmark is {share_tickets_eu:.2f}**'))
-    
+
     def plot_censorship_graph_new(self, year, selected_countries, figure_label):
         # List to store the filtered dataframes for each country
         filtered_data_per_country = []
