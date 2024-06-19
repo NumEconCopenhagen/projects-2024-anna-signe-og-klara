@@ -117,22 +117,22 @@ class Dataproject_functions:
         fig, ax = plt.subplots(figsize=(10, 6))
 
         # Define filtered DataFrame for Denmark
-        filtered_bio_dk_movies = self.filtered_bio[(self.filtered_bio['Country'] == 'Danmark') & (self.filtered_bio['Type'] == 'Film (antal)')]
+        filtered_bio_dk_movies = self.filtered_bio[(self.filtered_bio['Country'] == 'Denmark') & (self.filtered_bio['Type'] == 'Movies (number)')]
 
         # Define filtered DataFrame for USA
-        filtered_bio_usa_movies = self.filtered_bio[(self.filtered_bio['Country'] == 'USA') & (self.filtered_bio['Type'] == 'Film (antal)')]
+        filtered_bio_usa_movies = self.filtered_bio[(self.filtered_bio['Country'] == 'USA') & (self.filtered_bio['Type'] == 'Movies (number)')]
 
         # Define filtered DataFrame for EU-28 excluding Denmark
-        filtered_bio_eu_movies = self.filtered_bio[(self.filtered_bio['Country'] == 'EU-28 udenfor Danmark') & (self.filtered_bio['Country'] != 'Danmark') & (self.filtered_bio['Type'] == 'Film (antal)')]
+        filtered_bio_eu_movies = self.filtered_bio[(self.filtered_bio['Country'] == 'EU-28 excluding Denmark') & (self.filtered_bio['Type'] == 'Movies (number)')]
 
-        # Plot for Danmark
-        ax.plot(filtered_bio_dk_movies['Year'], filtered_bio_dk_movies['Value'], label='Danmark')
+        # Plot for Denmark
+        ax.plot(filtered_bio_dk_movies['Year'], filtered_bio_dk_movies['Value'], label='Denmark')
 
         # Plot for USA
         ax.plot(filtered_bio_usa_movies['Year'], filtered_bio_usa_movies['Value'], label='USA')
 
-        # Plot for EU-28 udenfor Danmark
-        ax.plot(filtered_bio_eu_movies['Year'], filtered_bio_eu_movies['Value'], label='EU-28 udenfor Danmark')
+        # Plot for EU-28 excluding Denmark
+        ax.plot(filtered_bio_eu_movies['Year'], filtered_bio_eu_movies['Value'], label='EU-28 excluding Denmark')
 
         # Set labels and title
         ax.set_xlabel('Year')
@@ -149,26 +149,26 @@ class Dataproject_functions:
         fig, ax = plt.subplots(figsize=(10, 6))
 
         # Define filtered DataFrame for Denmark
-        filtered_bio_dk_tickets = self.filtered_bio[(self.filtered_bio['Country'] == 'Danmark') & (self.filtered_bio['Type'] == 'Solgte billetter (1.000)')]
+        filtered_bio_dk_tickets = self.filtered_bio[(self.filtered_bio['Country'] == 'Denmark') & (self.filtered_bio['Type'] == 'Tickets sold (thousands)')]
 
         # Define filtered DataFrame for USA
-        filtered_bio_usa_tickets = self.filtered_bio[(self.filtered_bio['Country'] == 'USA') & (self.filtered_bio['Type'] == 'Solgte billetter (1.000)')]
+        filtered_bio_usa_tickets = self.filtered_bio[(self.filtered_bio['Country'] == 'USA') & (self.filtered_bio['Type'] == 'Tickets sold (thousands)')]
 
         # Define filtered DataFrame for EU-28 excluding Denmark
-        filtered_bio_eu_tickets = self.filtered_bio[(self.filtered_bio['Country'] == 'EU-28 udenfor Danmark') & (self.filtered_bio['Country'] != 'Danmark') & (self.filtered_bio['Type'] == 'Solgte billetter (1.000)')]
+        filtered_bio_eu_tickets = self.filtered_bio[(self.filtered_bio['Country'] == 'EU-28 excluding Denmark') & (self.filtered_bio['Type'] == 'Tickets sold (thousands)')]
 
-        # Plot for Danmark
-        ax.plot(filtered_bio_dk_tickets['Year'], filtered_bio_dk_tickets['Value'], label='Danmark')
+        # Plot for Denmark
+        ax.plot(filtered_bio_dk_tickets['Year'], filtered_bio_dk_tickets['Value'], label='Denmark')
 
         # Plot for USA
         ax.plot(filtered_bio_usa_tickets['Year'], filtered_bio_usa_tickets['Value'], label='USA')
 
-        # Plot for EU-28 udenfor Danmark
-        ax.plot(filtered_bio_eu_tickets['Year'], filtered_bio_eu_tickets['Value'], label='EU-28 udenfor Danmark')
+        # Plot for EU-28 excluding Denmark
+        ax.plot(filtered_bio_eu_tickets['Year'], filtered_bio_eu_tickets['Value'], label='EU-28 excluding Denmark')
 
         # Set labels and title
         ax.set_xlabel('Year')
-        ax.set_ylabel('Number of tickets sold (1.000)')
+        ax.set_ylabel('Number of tickets sold (thousands)')
         ax.set_title('Figure 2: Number of tickets sold by country')
 
         # Add legend
@@ -194,13 +194,13 @@ class Dataproject_functions:
 
         # Plot for 2019
         # Define filtered DataFrame for Denmark for the year 2019
-        filtered_bio_dk_2019 = filtered_bio_cencorship[(filtered_bio_cencorship['Country'] == 'Danmark') & (filtered_bio_cencorship['Year'] == 2019)] 
+        filtered_bio_dk_2019 = filtered_bio_cencorship[(filtered_bio_cencorship['Country'] == 'Denmark') & (filtered_bio_cencorship['Year'] == 2019)] 
 
         # Define filtered DataFrame for USA for the year 2019
         filtered_bio_usa_2019 = filtered_bio_cencorship[(filtered_bio_cencorship['Country'] == 'USA') & (filtered_bio_cencorship['Year'] == 2019)]
 
         # Define filtered DataFrame for EU-28 excluding Denmark for the year 2019
-        filtered_bio_eu_2019 = filtered_bio_cencorship[(filtered_bio_cencorship['Country'] == 'EU-28 udenfor Danmark') & (filtered_bio_cencorship['Country'] != 'Danmark') & (filtered_bio_cencorship['Year'] == 2019)]
+        filtered_bio_eu_2019 = filtered_bio_cencorship[(filtered_bio_cencorship['Country'] == 'EU-28 excluding Denmark') & (filtered_bio_cencorship['Year'] == 2019)]
 
         # Group the filtered DataFrames by the movie type 'Cinema_movie' and sum the values for 2019
         grouped_bio_dk_2019 = filtered_bio_dk_2019.groupby('Censorship')['Value'].sum().reset_index()
@@ -215,14 +215,14 @@ class Dataproject_functions:
         bar_positions_usa_2019 = np.arange(len(grouped_bio_usa_2019['Censorship'])) + bar_width
         bar_positions_eu_2019 = np.arange(len(grouped_bio_eu_2019['Censorship'])) + 2 * bar_width
 
-        # Plot for Danmark for 2019
-        ax1.bar(bar_positions_dk_2019, grouped_bio_dk_2019['Value'], width=bar_width, label='Danmark')
+        # Plot for Denmark for 2019
+        ax1.bar(bar_positions_dk_2019, grouped_bio_dk_2019['Value'], width=bar_width, label='Denmark')
 
         # Plot for USA for 2019
         ax1.bar(bar_positions_usa_2019, grouped_bio_usa_2019['Value'], width=bar_width, label='USA')
 
-        # Plot for EU-28 udenfor Danmark for 2019
-        ax1.bar(bar_positions_eu_2019, grouped_bio_eu_2019['Value'], width=bar_width, label='EU-28 udenfor Danmark')
+        # Plot for EU-28 excluding Denmark for 2019
+        ax1.bar(bar_positions_eu_2019, grouped_bio_eu_2019['Value'], width=bar_width, label='EU-28 excluding Denmark')
 
         # Set x-axis tick positions and labels for 2019
         ax1.set_xticks(bar_positions_usa_2019)
@@ -230,7 +230,7 @@ class Dataproject_functions:
 
         # Set labels and title for 2019
         ax1.set_xlabel('Censorship Category')
-        ax1.set_ylabel('Number of tickets sold (1.000)')
+        ax1.set_ylabel('Number of tickets sold (thousands)')
         ax1.set_title('Figure 3a: Number of tickets sold by censorship category for the year 2019')
 
         # Rotate x-axis labels for better readability for 2019
@@ -241,13 +241,13 @@ class Dataproject_functions:
 
         # Plot for 2020
         # Define filtered DataFrame for Denmark for the year 2020
-        filtered_bio_dk_2020 = filtered_bio_cencorship[(filtered_bio_cencorship['Country'] == 'Danmark') & (filtered_bio_cencorship['Year'] == 2020)] 
+        filtered_bio_dk_2020 = filtered_bio_cencorship[(filtered_bio_cencorship['Country'] == 'Denmark') & (filtered_bio_cencorship['Year'] == 2020)] 
 
         # Define filtered DataFrame for USA for the year 2020
         filtered_bio_usa_2020 = filtered_bio_cencorship[(filtered_bio_cencorship['Country'] == 'USA') & (filtered_bio_cencorship['Year'] == 2020)]
 
         # Define filtered DataFrame for EU-28 excluding Denmark for the year 2020
-        filtered_bio_eu_2020 = filtered_bio_cencorship[(filtered_bio_cencorship['Country'] == 'EU-28 udenfor Danmark') & (filtered_bio_cencorship['Country'] != 'Danmark') & (filtered_bio_cencorship['Year'] == 2020)]
+        filtered_bio_eu_2020 = filtered_bio_cencorship[(filtered_bio_cencorship['Country'] == 'EU-28 excluding Denmark') & (filtered_bio_cencorship['Year'] == 2020)]
 
         # Group the filtered DataFrames by the movie type 'Cinema_movie' and sum the values for 2020
         grouped_bio_dk_2020 = filtered_bio_dk_2020.groupby('Censorship')['Value'].sum().reset_index()
@@ -259,14 +259,14 @@ class Dataproject_functions:
         bar_positions_usa_2020 = np.arange(len(grouped_bio_usa_2020['Censorship'])) + bar_width * 3 + bar_width
         bar_positions_eu_2020 = np.arange(len(grouped_bio_eu_2020['Censorship'])) + bar_width * 3 + 2 * bar_width
 
-        # Plot for Danmark for 2020
-        ax2.bar(bar_positions_dk_2020, grouped_bio_dk_2020['Value'], width=bar_width, label='Danmark 2020')
+        # Plot for Denmark for 2020
+        ax2.bar(bar_positions_dk_2020, grouped_bio_dk_2020['Value'], width=bar_width, label='Denmark 2020')
 
         # Plot for USA for 2020
         ax2.bar(bar_positions_usa_2020, grouped_bio_usa_2020['Value'], width=bar_width, label='USA 2020')
 
-        # Plot for EU-28 udenfor Danmark for 2020
-        ax2.bar(bar_positions_eu_2020, grouped_bio_eu_2020['Value'], width=bar_width, label='EU-28 udenfor Danmark 2020')
+        # Plot for EU-28 excluding Denmark for 2020
+        ax2.bar(bar_positions_eu_2020, grouped_bio_eu_2020['Value'], width=bar_width, label='EU-28 excluding Denmark 2020')
 
         # Set x-axis tick positions and labels for 2020
         ax2.set_xticks(bar_positions_usa_2020)
@@ -274,7 +274,7 @@ class Dataproject_functions:
 
         # Set labels and title for 2020
         ax2.set_xlabel('Censorship Category')
-        ax2.set_ylabel('Number of tickets sold (1.000)')
+        ax2.set_ylabel('Number of tickets sold (thousands)')
         ax2.set_title('Figure 3b: Number of tickets sold by censorship category for the year 2020')
 
         # Rotate x-axis labels for better readability for 2020
@@ -298,9 +298,9 @@ class Dataproject_functions:
 
     def compute_movie_shares(self):
         # Calculate the total number of movies for each country
-        total_movies_dk = self.filtered_bio[(self.filtered_bio['Country'] == 'Danmark') & (self.filtered_bio['Type'] == 'Film (antal)')]['Value'].sum()
-        total_movies_usa = self.filtered_bio[(self.filtered_bio['Country'] == 'USA') & (self.filtered_bio['Type'] == 'Film (antal)')]['Value'].sum()
-        total_movies_eu = self.filtered_bio[(self.filtered_bio['Country'] == 'EU-28 udenfor Danmark') & (self.filtered_bio['Type'] == 'Film (antal)')]['Value'].sum()
+        total_movies_dk = self.filtered_bio[(self.filtered_bio['Country'] == 'Denmark') & (self.filtered_bio['Type'] == 'Movies (number)')]['Value'].sum()
+        total_movies_usa = self.filtered_bio[(self.filtered_bio['Country'] == 'USA') & (self.filtered_bio['Type'] == 'Movies (number)')]['Value'].sum()
+        total_movies_eu = self.filtered_bio[(self.filtered_bio['Country'] == 'EU-28 excluding Denmark') & (self.filtered_bio['Type'] == 'Movies (number)')]['Value'].sum()
 
         # Calculate shares
         total_movies = total_movies_dk + total_movies_usa + total_movies_eu
@@ -312,9 +312,9 @@ class Dataproject_functions:
 
     def compute_ticket_shares(self):
         # Calculate the total number of tickets sold for each country
-        total_tickets_dk = self.filtered_bio[(self.filtered_bio['Country'] == 'Danmark') & (self.filtered_bio['Type'] == 'Solgte billetter (1.000)')]['Value'].sum()
-        total_tickets_usa = self.filtered_bio[(self.filtered_bio['Country'] == 'USA') & (self.filtered_bio['Type'] == 'Solgte billetter (1.000)')]['Value'].sum()
-        total_tickets_eu = self.filtered_bio[(self.filtered_bio['Country'] == 'EU-28 udenfor Danmark') & (self.filtered_bio['Type'] == 'Solgte billetter (1.000)')]['Value'].sum()
+        total_tickets_dk = self.filtered_bio[(self.filtered_bio['Country'] == 'Denmark') & (self.filtered_bio['Type'] == 'Tickets sold (thousands)')]['Value'].sum()
+        total_tickets_usa = self.filtered_bio[(self.filtered_bio['Country'] == 'USA') & (self.filtered_bio['Type'] == 'Tickets sold (thousands)')]['Value'].sum()
+        total_tickets_eu = self.filtered_bio[(self.filtered_bio['Country'] == 'EU-28 excluding Denmark') & (self.filtered_bio['Type'] == 'Tickets sold (thousands)')]['Value'].sum()
 
         # Calculate shares
         total_tickets = total_tickets_dk + total_tickets_usa + total_tickets_eu
@@ -350,7 +350,7 @@ class Dataproject_functions:
         for country in selected_countries:
             # Filter the data for the current country and type
             filtered_data_movies = filtered_bio_censorship_year[(filtered_bio_censorship_year['Country'] == country) & 
-                                                                (filtered_bio_censorship_year['Type'] == 'Film (antal)')]
+                                                                (filtered_bio_censorship_year['Type'] == 'Movies (number)')]
 
             if not filtered_data_movies.empty:
                 # Aggregate the data by country and censorship category
@@ -391,7 +391,7 @@ class Dataproject_functions:
         fig, ax = plt.subplots(figsize=(10, 6))
 
         # Define filtered DataFrame for the selected country
-        filtered_bio_country_movies = self.filtered_bio[(self.filtered_bio['Country'] == country) & (self.filtered_bio['Type'] == 'Film (antal)')]
+        filtered_bio_country_movies = self.filtered_bio[(self.filtered_bio['Country'] == country) & (self.filtered_bio['Type'] == 'Movies (number)')]
 
         # Plot for the selected country
         ax.plot(filtered_bio_country_movies['Year'], filtered_bio_country_movies['Value'], label=country)
@@ -421,6 +421,4 @@ class Dataproject_functions:
         
         # Display the interactive plot
         display(interactive_plot)
-
-        
 
