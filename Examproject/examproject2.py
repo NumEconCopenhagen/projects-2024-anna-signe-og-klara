@@ -54,21 +54,19 @@ class ProductionEconomyClass:
                 good_market_2_cleared = np.isclose(c2_star, self.optimal_production(self.w, p2))
                 
                 if labor_market_cleared and good_market_1_cleared and good_market_2_cleared:
-                    results.append((p1, p2, True, c1_star, c2_star))
+                    results.append((p1, p2, True))
                 else:
-                    results.append((p1, p2, False, c1_star, c2_star))
+                    results.append((p1, p2, False))
         return results
     
     def find_equilibrium_prices(self):
         results = self.check_market_clearing()
         for result in results:
             if result[2]:
-                self.p1, self.p2, _, c1_star, c2_star = result
+                self.p1, self.p2, _, = result
                 print(f"Equilibrium prices: p1 = {self.p1}, p2 = {self.p2}")
-                print(f"Consumption of good 1: c1_star = {c1_star}")
-                print(f"Consumption of good 2: c2_star = {c2_star}")
-                return self.p1, self.p2, c1_star, c2_star
-        return None, None, None, None
+                return self.p1, self.p2
+        return None, None
     
     def c1(self, l):
         return self.par.alpha * (self.w * l + self.par.T + self.profit(self.w, self.p1) + self.profit(self.w, self.p2)) / self.p1
@@ -105,3 +103,22 @@ class ProductionEconomyClass:
             return self.par.tau, -result.fun
         else:
             raise ValueError("Optimization failed")
+        
+
+    def consumption_without_tax(self):
+        # Set tau and T to zero explicitly for this calculation
+        self.par.tau = 0.0
+        self.par.T = 0.0
+        
+        # Find the optimal labor for calculating consumption without tax
+        l_star = self.optimal_behavior()
+        
+        # Calculate consumption of c1 and c2 without the tax
+        c1_no_tax = self.c1(l_star)
+        c2_no_tax = self.c2(l_star)
+        
+        # Print the results
+        print(f"Consumption of c1 without tax: {c1_no_tax}")
+        print(f"Consumption of c2 without tax: {c2_no_tax}")
+        return c1_no_tax, c2_no_tax
+
