@@ -267,3 +267,68 @@ class CareerChoiceSimulation:
                 new_realized_utilities[i] = self.par.v[new_chosen_careers[i]] + np.mean(epsilons_self[new_chosen_careers[i]])
 
             return new_chosen_careers, prior_expected_utilities, new_realized_utilities, switched_careers
+    
+
+
+
+class BarycentricInterpolation:
+    
+    def __init__(self):
+        self.rng = np.random.default_rng(2024)
+        self.X = self.rng.uniform(size=(50, 2))
+        self.y = self.rng.uniform(size=(2,))
+        self.F = np.array([self.func(x) for x in self.X])
+    
+    @staticmethod
+    def func(x):
+        return x[0] * x[1]
+    
+    def compute_nearest_points(self):
+        y = self.y
+        distances = np.linalg.norm(self.X - y, axis=1)
+        A = self.X[np.argmin(distances + (self.X[:, 0] <= y[0]) + (self.X[:, 1] <= y[1]))]
+        B = self.X[np.argmin(distances + (self.X[:, 0] <= y[0]) + (self.X[:, 1] >= y[1]))]
+        C = self.X[np.argmin(distances + (self.X[:, 0] >= y[0]) + (self.X[:, 1] >= y[1]))]
+        D = self.X[np.argmin(distances + (self.X[:, 0] >= y[0]) + (self.X[:, 1] <= y[1]))]
+        return A, B, C, D
+    
+    @staticmethod
+    def barycentric_coordinates(A, B, C, y):
+        denom = (B[1] - C[1]) * (A[0] - C[0]) + (C[0] - B[0]) * (A[1] - C[1])
+        r1 = ((B[1] - C[1]) * (y[0] - C[0]) + (C[0] - B[0]) * (y[1] - C[1])) / denom
+        r2 = ((C[1] - A[1]) * (y[0] - C[0]) + (A[0] - C[0]) * (y[1] - C[1])) / denom
+        r3 = 1 - r1 - r2
+        return r1, r2, r3
+    
+    @staticmethod
+    def is_inside_triangle(r1, r2, r3):
+        return (0 <= r1 <= 1) and (0 <= r2 <= 1) and (0 <= r3 <= 1)
+    
+    def interpolate(self):
+        A, B, C, D = self.compute_nearest_points()
+        r1, r2, r3 = self.barycentric_coordinates(A, B, C, self.y)
+        
+        if self.is_inside_triangle(r1, r2, r3):
+            fA = self.F[np.where((self.X == A).all(axis=1))[0][0]]
+            fB = self.F[np.where((self.X == B).all(axis=1))[0][0]]
+            fC = self.F[np.where((self.X == C).all(axis=1))[0][0]]
+            return r1 * fA + r2 * fB + r3 * fC
+        else:
+            r1, r2, r3 = self.barycentric_coordinates(C, D, A, self.y)
+            if self.is_inside_triangle(r1, r2, r3):
+                fC = self.F[np.where((self.X == C).all(axis=1))[0][0]]
+                fD = self.F[np.where((self.X == D).all(axis=1))[0][0]]
+                fA = self.F[np.where((self.X == A).all(axis=1))[0][0]]
+                return r1 * fC + r2 * fD + r3 * fA
+            else:
+                return np.nan
+
+    def visualize(self):
+        plt.scatter(self.X[:, 0], self.X[:, 1], c=self.F, cmap='viridis', label='Points')
+        plt.scatter(self.y[0], self.y[1], c='red', label='Point y')
+        plt.colorbar(label='Function values')
+        plt.legend()
+        plt.xlabel('x1')
+        plt.ylabel('x2')
+        plt.title('Barycentric Interpolation')
+        plt.show()
