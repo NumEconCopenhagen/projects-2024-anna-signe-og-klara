@@ -54,34 +54,54 @@ class ProductionEconomyClass:
                 good_market_2_cleared = np.isclose(c2_star, self.optimal_production(self.w, p2))
                 
                 if labor_market_cleared and good_market_1_cleared and good_market_2_cleared:
-                    results.append((p1, p2, True))
+                    results.append((p1, p2, True, c1_star, c2_star))
                 else:
-                    results.append((p1, p2, False))
+                    results.append((p1, p2, False, c1_star, c2_star))
         return results
     
     def find_equilibrium_prices(self):
         results = self.check_market_clearing()
         for result in results:
             if result[2]:
-                self.p1, self.p2 = result[0], result[1]
-                break
-        print(f"Equilibrium prices: p1 = {economy.p1}, p2 = {economy.p2}")
-        return self.p1, self.p2
-        
+                self.p1, self.p2, _, c1_star, c2_star = result
+                print(f"Equilibrium prices: p1 = {self.p1}, p2 = {self.p2}")
+                print(f"Consumption of good 1: c1_star = {c1_star}")
+                print(f"Consumption of good 2: c2_star = {c2_star}")
+                return self.p1, self.p2, c1_star, c2_star
+        return None, None, None, None
     
-    def optimize_social_welfare(self):
-        self.find_equilibrium_prices()
-        if self.p1 is None or self.p2 is None:
-            return None
-        c1_star = self.optimal_production(self.w, self.p1)
-        c2_star = self.optimal_production(self.w, self.p2)
-        l_star = self.optimal_labor(self.w, self.p1) + self.optimal_labor(self.w, self.p2)
+    def c1(self, l):
+        return self.par.alpha * (self.w * l + self.par.T + self.profit(self.w, self.p1) + self.profit(self.w, self.p2)) / self.p1
+    
+    def c2(self, l):
+        return (1 - self.par.alpha) * (self.w * l + self.par.T + self.profit(self.w, self.p1) + self.profit(self.w, self.p2)) / (self.p2 + self.par.tau)
+    
+    def optimal_behavior(self):
+        objective = lambda l: -(self.par.alpha * np.log(self.c1(l)) + (1 - self.par.alpha) * np.log(self.c2(l)) - self.par.nu * (l ** (1 + self.par.epsilon)) / (1 + self.par.epsilon))
+        result = optimize.minimize_scalar(objective, bounds=(0, 10), method='bounded')
+        if result.success:
+            return result.x
+        else:
+            raise ValueError("Optimization failed")
+        
+    def social_welfare(self):
+        l_star = self.optimal_behavior()
+        c1_star = self.c1(l_star)
+        c2_star = self.c2(l_star)
         utility = self.consumer_utility(c1_star, c2_star, l_star)
         swf = utility - self.par.kappa * c2_star
-        print(f"Social welfare function value: {economy.optimize_social_welfare()}")
         return swf
 
-# Example usage
-economy = ProductionEconomyClass()
-print(f"Equilibrium prices: p1 = {economy.p1}, p2 = {economy.p2}")
-print(f"Social welfare function value: {economy.optimize_social_welfare()}")
+    def swf_with_tax(self, tau):
+        self.par.tau = tau
+        self.par.T = self.par.tau * self.c2(self.optimal_behavior())
+        return -self.social_welfare()  # Minimize negative SWF to maximize SWF
+
+    def find_optimal_tax(self):
+        result = optimize.minimize_scalar(self.swf_with_tax, bounds=(0, 2), method='bounded')
+        if result.success:
+            self.par.tau = result.x
+            self.par.T = self.par.tau * self.c2(self.optimal_behavior())
+            return self.par.tau, -result.fun
+        else:
+            raise ValueError("Optimization failed")
