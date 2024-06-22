@@ -154,17 +154,23 @@ class CareerChoiceSimulation:
         np.random.seed(1000)  # Set seed for random number generation
 
     def simulate_utility(self):
-        # Calculate expected utility E[u^k_(i,j)|v_j] and average realized utility for career track j
+        v_known = np.array([1, 2, 3])  # Known initial values of v_j
+        # Initialize arrays to store results
         expected_utilities = np.zeros((self.par.J,))
         average_realized_utilities = np.zeros((self.par.J,))
         
         for j in range(self.par.J):
             # Generate epsilon values for each career track j
             epsilons = np.random.normal(loc=0, scale=self.par.sigma, size=(self.par.N, self.par.K))
-            utilities = self.par.v[j] + epsilons
             
-            expected_utilities[j] = np.mean(utilities)  # This directly gives the expected utility
-            average_realized_utilities[j] = np.mean(utilities)  # Same as expected utility since expectation is over the same distribution
+            # Calculate utility u^k_(i,j) for each career track j
+            utilities = v_known[j] + epsilons
+            
+            # Calculate expected utility E[u^k_(i,j)|v_j] for career track j
+            expected_utilities[j] = v_known[j] + (1 / self.par.K) * np.sum(epsilons)
+            
+            # Calculate average realized utility for career track j
+            average_realized_utilities[j] = np.mean(utilities)
         
         return expected_utilities, average_realized_utilities
 
