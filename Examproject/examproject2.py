@@ -54,11 +54,11 @@ class ProductionEconomyClass:
                 good_market_2_cleared = np.isclose(c2_star, self.optimal_production(self.w, p2))
                 
                 if labor_market_cleared and good_market_1_cleared and good_market_2_cleared:
-                    results.append((p1, p2, True))
+                    results.append((round(p1, 2), round(p2, 2), True))
                 else:
-                    results.append((p1, p2, False))
+                    results.append((round(p1, 2), round(p2, 2), False))
         return results
-    
+
     def find_equilibrium_prices(self):
         results = self.check_market_clearing()
         for result in results:
@@ -82,6 +82,24 @@ class ProductionEconomyClass:
         else:
             raise ValueError("Optimization failed")
         
+    def consumption_without_tax(self):
+        # Set tau and T to zero explicitly for this calculation
+        self.par.tau = 0.0
+        self.par.T = 0.0
+        
+        # Find the optimal labor for calculating consumption without tax
+        l_star = self.optimal_behavior()
+        
+        # Calculate consumption of c1 and c2 without the tax
+        c1_no_tax = self.c1(l_star)
+        c2_no_tax = self.c2(l_star)
+        
+        # Print the results
+        print(f"Consumption of c1 without tax: {c1_no_tax}")
+        print(f"Consumption of c2 without tax: {c2_no_tax}")
+        return c1_no_tax, c2_no_tax
+      
+        
     def social_welfare(self):
         l_star = self.optimal_behavior()
         c1_star = self.c1(l_star)
@@ -100,25 +118,56 @@ class ProductionEconomyClass:
         if result.success:
             self.par.tau = result.x
             self.par.T = self.par.tau * self.c2(self.optimal_behavior())
-            return self.par.tau, -result.fun
         else:
             raise ValueError("Optimization failed")
-        
-
-    def consumption_without_tax(self):
-        # Set tau and T to zero explicitly for this calculation
-        self.par.tau = 0.0
-        self.par.T = 0.0
-        
+    
         # Find the optimal labor for calculating consumption without tax
         l_star = self.optimal_behavior()
         
-        # Calculate consumption of c1 and c2 without the tax
-        c1_no_tax = self.c1(l_star)
-        c2_no_tax = self.c2(l_star)
-        
-        # Print the results
-        print(f"Consumption of c1 without tax: {c1_no_tax}")
-        print(f"Consumption of c2 without tax: {c2_no_tax}")
-        return c1_no_tax, c2_no_tax
 
+        # Calculate the consumption values 
+        c1_star_tax = self.c1(l_star)
+        c2_star_tax = self.c2(l_star)
+
+        # Calculate consumption of c1 and c2 without the tax
+          
+        # Print the results
+        print(f"Consumption of c1 with tax: {c1_star_tax}")
+        print(f"Consumption of c2 with tax: {c2_star_tax}")
+        print(f"Optimal tax rate: {self.par.tau}")
+        print(f"Social welfare: {-result.fun}")
+        return c1_star_tax, c2_star_tax, self.par.tau, -result.fun
+    
+
+
+
+class CareerChoiceSimulation:
+    def __init__(self):
+        self.par = SimpleNamespace()
+        self.par.J = 3       # Number of career tracks
+        self.par.N = 10      # Number of graduates
+        self.par.K = 10000   # Number of draws for each graduate
+        self.par.F = np.arange(1, self.par.N+1) 
+        self.par.sigma = 2
+        self.par.v_known = np.array([1, 2, 3])  # Known initial values of v_j
+        self.par.c = 1
+        
+    def simulate_utility(self):
+        # Initialize arrays to store results
+        expected_utilities = np.zeros((self.par.J,))
+        average_realized_utilities = np.zeros((self.par.J,))
+        
+        for j in range(self.par.J):
+            # Generate epsilon values for each career track j
+            epsilons = np.random.normal(loc=0, scale=self.par.sigma, size=(self.par.N, self.par.K))
+            
+            # Calculate utility u^k_(i,j) for each career track j
+            utilities = self.par.v_known[j] + epsilons
+            
+            # Calculate expected utility E[u^k_(i,j)|v_j] for career track j
+            expected_utilities[j] = self.par.v_known[j] + (1 / self.par.K) * np.sum(epsilons)
+            
+            # Calculate average realized utility for career track j
+            average_realized_utilities[j] = np.mean(utilities)
+        
+        return expected_utilities, average_realized_utilities
