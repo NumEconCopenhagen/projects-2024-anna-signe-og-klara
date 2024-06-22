@@ -138,36 +138,56 @@ class ProductionEconomyClass:
         print(f"Social welfare: {-result.fun}")
         return c1_star_tax, c2_star_tax, self.par.tau, -result.fun
     
-
-
+import numpy as np
+from types import SimpleNamespace
 
 class CareerChoiceSimulation:
-    def __init__(self):
+    def __init__(self, N=10):
         self.par = SimpleNamespace()
         self.par.J = 3       # Number of career tracks
-        self.par.N = 10      # Number of graduates
+        self.par.N = N       # Total number of graduates
         self.par.K = 10000   # Number of draws for each graduate
-        self.par.F = np.arange(1, self.par.N+1) 
+        self.par.F = np.arange(1, N + 1)  # Fi for each graduate, incrementally from 1 to N
         self.par.sigma = 2
-        self.par.v_known = np.array([1, 2, 3])  # Known initial values of v_j
+        self.par.v = np.array([1, 2, 3])  # Known values of v_j
         self.par.c = 1
-        
+        np.random.seed(1000)  # Set seed for random number generation
+
     def simulate_utility(self):
-        # Initialize arrays to store results
+        # Calculate expected utility E[u^k_(i,j)|v_j] and average realized utility for career track j
         expected_utilities = np.zeros((self.par.J,))
         average_realized_utilities = np.zeros((self.par.J,))
         
         for j in range(self.par.J):
             # Generate epsilon values for each career track j
             epsilons = np.random.normal(loc=0, scale=self.par.sigma, size=(self.par.N, self.par.K))
+            utilities = self.par.v[j] + epsilons
             
-            # Calculate utility u^k_(i,j) for each career track j
-            utilities = self.par.v_known[j] + epsilons
-            
-            # Calculate expected utility E[u^k_(i,j)|v_j] for career track j
-            expected_utilities[j] = self.par.v_known[j] + (1 / self.par.K) * np.sum(epsilons)
-            
-            # Calculate average realized utility for career track j
-            average_realized_utilities[j] = np.mean(utilities)
+            expected_utilities[j] = np.mean(utilities)  # This directly gives the expected utility
+            average_realized_utilities[j] = np.mean(utilities)  # Same as expected utility since expectation is over the same distribution
         
         return expected_utilities, average_realized_utilities
+
+    def simulate_career_choice(self):
+        # Simulate career choice and calculate prior expected utility and realized utility
+        chosen_careers = np.zeros(self.par.N, dtype=int)
+        prior_expected_utilities = np.zeros((self.par.N, self.par.J))
+        realized_utilities = np.zeros(self.par.N)
+        
+        for i in range(self.par.N):
+            Fi = self.par.F[i]
+            epsilons_friends = np.random.normal(loc=0, scale=self.par.sigma, size=(self.par.J * Fi, self.par.K))
+            epsilons_self = np.random.normal(loc=0, scale=self.par.sigma, size=(self.par.J, self.par.K))
+            
+            estimated_v_j = np.mean(epsilons_friends.reshape(Fi, self.par.J, self.par.K), axis=0).mean(axis=1)
+            prior_expected_utilities[i] = estimated_v_j
+            
+            # Calculate probabilities using softmax of estimated utilities
+            probabilities = np.exp(estimated_v_j - np.max(estimated_v_j))
+            probabilities /= probabilities.sum()
+            chosen_careers[i] = np.random.choice(self.par.J, p=probabilities)
+            
+            # Calculate realized utility for the chosen career track
+            realized_utilities[i] = estimated_v_j[chosen_careers[i]] + np.mean(epsilons_self[chosen_careers[i]])
+
+        return chosen_careers, prior_expected_utilities, realized_utilities
