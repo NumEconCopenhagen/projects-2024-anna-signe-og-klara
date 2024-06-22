@@ -139,6 +139,7 @@ class ProductionEconomyClass:
         return c1_star_tax, c2_star_tax, self.par.tau, -result.fun
     
 import numpy as np
+import matplotlib.pyplot as plt
 from types import SimpleNamespace
 
 class CareerChoiceSimulation:
@@ -167,7 +168,7 @@ class CareerChoiceSimulation:
             utilities = v_known[j] + epsilons
             
             # Calculate expected utility E[u^k_(i,j)|v_j] for career track j
-            expected_utilities[j] = v_known[j] + (1 / self.par.K) * np.sum(epsilons)
+            expected_utilities[j] = v_known[j]  # v_j is the expected value since E[epsilon] = 0
             
             # Calculate average realized utility for career track j
             average_realized_utilities[j] = np.mean(utilities)
@@ -185,7 +186,7 @@ class CareerChoiceSimulation:
             epsilons_friends = np.random.normal(loc=0, scale=self.par.sigma, size=(self.par.J * Fi, self.par.K))
             epsilons_self = np.random.normal(loc=0, scale=self.par.sigma, size=(self.par.J, self.par.K))
             
-            estimated_v_j = np.mean(epsilons_friends.reshape(Fi, self.par.J, self.par.K), axis=0).mean(axis=1)
+            estimated_v_j = np.mean(epsilons_friends.reshape(Fi, self.par.J, self.par.K), axis=0).mean(axis=1) + self.par.v
             prior_expected_utilities[i] = estimated_v_j
             
             # Calculate probabilities using softmax of estimated utilities
@@ -194,6 +195,75 @@ class CareerChoiceSimulation:
             chosen_careers[i] = np.random.choice(self.par.J, p=probabilities)
             
             # Calculate realized utility for the chosen career track
-            realized_utilities[i] = estimated_v_j[chosen_careers[i]] + np.mean(epsilons_self[chosen_careers[i]])
+            realized_utilities[i] = self.par.v[chosen_careers[i]] + np.mean(epsilons_self[chosen_careers[i]])
 
         return chosen_careers, prior_expected_utilities, realized_utilities
+
+    def analyze_results(self, chosen_careers, prior_expected_utilities, realized_utilities):
+        career_counts = np.zeros(self.par.J, dtype=int)
+        for career in chosen_careers:
+            career_counts[career] += 1
+        
+        career_shares = career_counts / self.par.N
+        average_prior_utilities = np.mean(prior_expected_utilities, axis=0)
+        average_realized_utilities = np.zeros(self.par.J)
+        for j in range(self.par.J):
+            indices = (chosen_careers == j)
+            average_realized_utilities[j] = np.mean(realized_utilities[indices])
+
+        utility_differences = average_realized_utilities - average_prior_utilities
+        
+        return career_shares, average_prior_utilities, average_realized_utilities, utility_differences
+    
+    def simulate_initial_choice(self):
+        chosen_careers = np.zeros(self.par.N, dtype=int)
+        prior_expected_utilities = np.zeros((self.par.N, self.par.J))
+        realized_utilities = np.zeros(self.par.N)
+        
+        for i in range(self.par.N):
+            Fi = self.par.F[i]
+            epsilons_friends = np.random.normal(loc=0, scale=self.par.sigma, size=(self.par.J * Fi, self.par.K))
+            epsilons_self = np.random.normal(loc=0, scale=self.par.sigma, size=(self.par.J, self.par.K))
+            
+            estimated_v_j = np.mean(epsilons_friends.reshape(Fi, self.par.J, self.par.K), axis=0).mean(axis=1) + self.par.v
+            prior_expected_utilities[i] = estimated_v_j
+            
+            # Calculate probabilities using softmax of estimated utilities
+            probabilities = np.exp(estimated_v_j - np.max(estimated_v_j))
+            probabilities /= probabilities.sum()
+            chosen_careers[i] = np.random.choice(self.par.J, p=probabilities)
+            
+            # Calculate realized utility for the chosen career track
+            realized_utilities[i] = self.par.v[chosen_careers[i]] + np.mean(epsilons_self[chosen_careers[i]])
+
+        return chosen_careers, prior_expected_utilities, realized_utilities
+
+
+    def simulate_career_switch(self, chosen_careers, realized_utilities):
+            new_chosen_careers = np.zeros(self.par.N, dtype=int)
+            new_prior_expected_utilities = np.zeros((self.par.N, self.par.J))
+            new_realized_utilities = np.zeros(self.par.N)
+            switched_careers = np.zeros(self.par.N, dtype=bool)
+            
+            for i in range(self.par.N):
+                Fi = self.par.F[i]
+                epsilons_friends = np.random.normal(loc=0, scale=self.par.sigma, size=(self.par.J * Fi, self.par.K))
+                epsilons_self = np.random.normal(loc=0, scale=self.par.sigma, size=(self.par.J, self.par.K))
+                
+                estimated_v_j = np.mean(epsilons_friends.reshape(Fi, self.par.J, self.par.K), axis=0).mean(axis=1) + self.par.v
+                prior_expected_utilities = estimated_v_j.copy()
+                prior_expected_utilities[chosen_careers[i]] = self.par.v[chosen_careers[i]]
+                prior_expected_utilities[prior_expected_utilities != self.par.v[chosen_careers[i]]] -= self.par.c
+
+                # Calculate probabilities using softmax of estimated utilities
+                probabilities = np.exp(prior_expected_utilities - np.max(prior_expected_utilities))
+                probabilities /= probabilities.sum()
+                new_chosen_careers[i] = np.random.choice(self.par.J, p=probabilities)
+                
+                # Check if they switched careers
+                switched_careers[i] = new_chosen_careers[i] != chosen_careers[i]
+                
+                # Calculate realized utility for the new chosen career track
+                new_realized_utilities[i] = self.par.v[new_chosen_careers[i]] + np.mean(epsilons_self[new_chosen_careers[i]])
+
+            return new_chosen_careers, prior_expected_utilities, new_realized_utilities, switched_careers
