@@ -325,3 +325,26 @@ class BarycentricInterpolation:
             true_f_y = result["true_f_y"]
             results.append({"point": point, "approximated_f_y": approximated_f_y, "true_f_y": true_f_y})
         return results
+    
+    def plot_y_specific(self, X, y, A, B, C, D):
+        plt.scatter(X[:, 0], X[:, 1], label='Points in X')
+        plt.scatter(*y, color='r', label='Point y')
+        
+        if not np.isnan(A).any():
+            plt.scatter(*A, color='g', label='Point A')
+        if not np.isnan(B).any():
+            plt.scatter(*B, color='b', label='Point B')
+        if not np.isnan(C).any():
+            plt.scatter(*C, color='m', label='Point C')
+        if not np.isnan(D).any():
+            plt.scatter(*D, color='y', label='Point D')
+
+        if not (np.isnan(A).any() or np.isnan(B).any() or np.isnan(C).any()):
+            triangle_ABC = plt.Polygon([A, B, C], fill=None, edgecolor='k', linestyle='--')
+            plt.gca().add_patch(triangle_ABC)
+        if not (np.isnan(C).any() or np.isnan(D).any() or np.isnan(A).any()):
+            triangle_CDA = plt.Polygon([C, D, A], fill=None, edgecolor='c', linestyle='--')
+            plt.gca().add_patch(triangle_CDA)
+
+        plt.legend()
+        plt.show()
