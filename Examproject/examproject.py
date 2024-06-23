@@ -114,6 +114,7 @@ class ProductionEconomyClass:
         print(f"Consumption of c2 without tax: {c2_no_tax:.2f}")
         return # c1_no_tax, c2_no_tax
 
+#Question 3
     def social_welfare(self):
         l_star = self.optimal_behavior()
         c1_star = self.c1(l_star)
