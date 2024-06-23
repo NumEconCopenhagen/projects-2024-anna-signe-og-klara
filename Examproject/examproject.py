@@ -150,15 +150,12 @@ class ProductionEconomyClass:
 
 
 
-
 class BarycentricInterpolation:
 
     # Calculate the barycentric coordinates, r1, r2, r3
     def r1(self, args, A, B, C):
-        # Assigning the two arguments to y1 and y2
         y1 = args[0]
         y2 = args[1]
-        # Splitting the formula for r1 in nominator and denominator 
         nom = (B[1] - C[1]) * (y1 - C[0]) + (C[0] - B[0]) * (y2 - C[1])
         denom = (B[1] - C[1]) * (A[0] - C[0]) + (C[0] - B[0]) * (A[1] - C[1])
         r = nom / denom
@@ -191,20 +188,15 @@ class BarycentricInterpolation:
         ]
         # Based on the conditions, find the closest point in each quadrant
         closest_points = []
-        # loop through the conditions
         for condition in conditions:
-            # extract the points that meet the condition
             filtered_points = X[condition]
-            # if there are no points that meet the condition, append NaN
             if len(filtered_points) == 0:
                 closest_points.append(np.NaN)
-            # else find the closest point to y
             else:
                 distances = self.distance(filtered_points, y)
                 closest_point = filtered_points[np.argmin(distances)]
                 closest_points.append(closest_point)
 
-        # Return the four points
         A, B, C, D = closest_points
         return A, B, C, D
 
@@ -212,16 +204,23 @@ class BarycentricInterpolation:
     def plot_points_and_triangles(self, X, y, A, B, C, D):
         plt.scatter(X[:, 0], X[:, 1], label='Points in X')
         plt.scatter(*y, color='r', label='Point y')
-        plt.scatter(*A, color='g', label='Point A')
-        plt.scatter(*B, color='b', label='Point B')
-        plt.scatter(*C, color='m', label='Point C')
-        plt.scatter(*D, color='y', label='Point D')
+
+        if not np.isnan(A).any():
+            plt.scatter(*A, color='g', label='Point A')
+        if not np.isnan(B).any():
+            plt.scatter(*B, color='b', label='Point B')
+        if not np.isnan(C).any():
+            plt.scatter(*C, color='m', label='Point C')
+        if not np.isnan(D).any():
+            plt.scatter(*D, color='y', label='Point D')
 
         # Draw triangles
-        triangle_ABC = plt.Polygon([A, B, C], fill=None, edgecolor='k', linestyle='--')
-        triangle_CDA = plt.Polygon([C, D, A], fill=None, edgecolor='c', linestyle='--')
-        plt.gca().add_patch(triangle_ABC)
-        plt.gca().add_patch(triangle_CDA)
+        if not (np.isnan(A).any() or np.isnan(B).any() or np.isnan(C).any()):
+            triangle_ABC = plt.Polygon([A, B, C], fill=None, edgecolor='k', linestyle='--')
+            plt.gca().add_patch(triangle_ABC)
+        if not (np.isnan(C).any() or np.isnan(D).any() or np.isnan(A).any()):
+            triangle_CDA = plt.Polygon([C, D, A], fill=None, edgecolor='c', linestyle='--')
+            plt.gca().add_patch(triangle_CDA)
 
         plt.legend()
         plt.show()
@@ -265,11 +264,10 @@ class BarycentricInterpolation:
         }
         return results
 
-
     # Approximate the value of F based on the barycentric coordinates
     def approximate_f(self, y, X, F):
         A, B, C, D = self.closest_points_in_quadrants(X, y)
-
+        
         if np.isnan(A).any() or np.isnan(B).any() or np.isnan(C).any() or np.isnan(D).any():
             return np.nan
         
@@ -316,20 +314,14 @@ class BarycentricInterpolation:
         return results
 
     # Do the same as above, but for multiple points in Y
-    def compute_and_compare_multiple_with_Y(self, X):
+    def compute_and_compare_multiple_Y(self, X):
         # Define the set Y
         Y = [(0.2, 0.2), (0.8, 0.2), (0.8, 0.8), (0.8, 0.2), (0.5, 0.5)]
         
         results = []
-        differences = []
         for point in Y:
             result = self.compute_and_compare(point, X)
             approximated_f_y = result["approximated_f_y"]
             true_f_y = result["true_f_y"]
-            difference = np.abs(approximated_f_y - true_f_y)
-            differences.append(difference)
             results.append({"point": point, "approximated_f_y": approximated_f_y, "true_f_y": true_f_y})
-        
-        mean_difference = np.mean(differences)
-        return results, mean_difference
-    
+        return results
