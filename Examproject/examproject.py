@@ -316,14 +316,20 @@ class BarycentricInterpolation:
         return results
 
     # Do the same as above, but for multiple points in Y
-    def compute_and_compare_multiple_Y(self, X):
+    def compute_and_compare_multiple_with_Y(self, X):
         # Define the set Y
         Y = [(0.2, 0.2), (0.8, 0.2), (0.8, 0.8), (0.8, 0.2), (0.5, 0.5)]
         
         results = []
-        # loop through the points in Y
+        differences = []
         for point in Y:
             result = self.compute_and_compare(point, X)
-            results.append({"point": point, "approximated_f_y": result["approximated_f_y"], "true_f_y": result["true_f_y"]})
-        return results
+            approximated_f_y = result["approximated_f_y"]
+            true_f_y = result["true_f_y"]
+            difference = np.abs(approximated_f_y - true_f_y)
+            differences.append(difference)
+            results.append({"point": point, "approximated_f_y": approximated_f_y, "true_f_y": true_f_y})
+        
+        mean_difference = np.mean(differences)
+        return results, mean_difference
     
