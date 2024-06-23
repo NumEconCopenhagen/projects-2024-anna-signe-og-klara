@@ -122,6 +122,8 @@ class BarycentricInterpolation:
     # Approximate the value of F based on the barycentric coordinates
     def approximate_f(self, y, X, F):
         A, B, C, D = self.closest_points_in_quadrants(X, y)
+        
+        print(f"Point {y}: Closest points are A={A}, B={B}, C={C}, D={D}")  # Debugging statement
 
         if np.isnan(A).any() or np.isnan(B).any() or np.isnan(C).any() or np.isnan(D).any():
             return np.nan
@@ -174,8 +176,14 @@ class BarycentricInterpolation:
         Y = [(0.2, 0.2), (0.8, 0.2), (0.8, 0.8), (0.8, 0.2), (0.5, 0.5)]
         
         results = []
-        # loop through the points in Y
+        differences = []
         for point in Y:
+            print(f"Computing for point: {point}")  # Debugging statement
             result = self.compute_and_compare(point, X)
-            results.append({"point": point, "approximated_f_y": result["approximated_f_y"], "true_f_y": result["true_f_y"]})
-        return results
+            approximated_f_y = result["approximated_f_y"]
+            true_f_y = result["true_f_y"]
+            print(f"Approximated value: {approximated_f_y}, True value: {true_f_y}")  # Debugging statement
+            difference = np.abs(approximated_f_y - true_f_y)
+            differences.append(difference)
+            results.append({"point": point, "approximated_f_y": approximated_f_y, "true_f_y": true_f_y})
+        
